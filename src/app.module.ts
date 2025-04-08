@@ -1,11 +1,16 @@
+import { MainModule } from './main/main.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { Cliente } from './main/entities/cliente.entity';
+import { Plan } from './main/entities/plan.entity';
+import { Suscripcion } from './main/entities/suscripcion.entity';
 
 @Module({
   imports: [
+    MainModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -17,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([Cliente, Plan, Suscripcion]),
   ],
   controllers: [AppController],
   providers: [AppService],
