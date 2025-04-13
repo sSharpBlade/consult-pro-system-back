@@ -1,17 +1,18 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entity/user.entity';
-import { SecretaryDoctor } from '../secretaryDoctor/entity/secretaryDoctor.entity';
 import { SecretaryController } from './secretary.controller';
 import { SecretaryService } from './secretary.service';
 import { UserModule } from '../user/user.module';
 import { DoctorModule } from '../doctor/doctor.module';
+import { SecretaryDoctorModule } from 'src/secretaryDoctor/secretarydoctor.module';
+import { Secretary } from './entity/secretary.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, SecretaryDoctor]),
-    UserModule,
-    DoctorModule,
+    SecretaryDoctorModule,
+    TypeOrmModule.forFeature([Secretary]),
+    forwardRef(() => UserModule),
+    forwardRef(() => DoctorModule),
   ],
   controllers: [SecretaryController],
   providers: [SecretaryService],

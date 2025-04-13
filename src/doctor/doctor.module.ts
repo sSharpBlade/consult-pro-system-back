@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Doctor } from './entity/doctor.entity';
 import { SecretaryDoctor } from '../secretaryDoctor/entity/secretaryDoctor.entity';
@@ -19,11 +19,11 @@ import { ClinicModule } from '../clinic/clinic.module';
       Clinic,
       Appointment,
     ]),
-    UserModule,
-    ClinicModule,
+    forwardRef(() => UserModule), // <-- Usar forwardRef
+    forwardRef(() => ClinicModule), // <-- Usar forwardRef si ClinicModule también depende de DoctorModule
   ],
   controllers: [DoctorsController],
   providers: [DoctorsService],
-  exports: [DoctorsService],
+  exports: [DoctorsService, TypeOrmModule],
 })
 export class DoctorModule {}

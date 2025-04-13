@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Clinic } from './entity/clinic.entity';
 import { Plan } from '../plan/entity/plan.entity';
@@ -13,7 +13,7 @@ import { DoctorModule } from '../doctor/doctor.module';
   imports: [
     TypeOrmModule.forFeature([Clinic, Plan, Doctor, ClinicPayment]),
     PlanModule,
-    DoctorModule,
+    forwardRef(() => DoctorModule), // <-- Usar forwardRef si ClinicModule depende de DoctorModule
   ],
   controllers: [ClinicsController],
   providers: [ClinicsService],
