@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
 import { Doctor } from '../../doctor/entity/doctor.entity';
+import { SecretaryDoctor } from 'src/secretaryDoctor/entity/secretaryDoctor.entity';
 
 @Entity('secretaries')
 export class Secretary {
@@ -27,6 +29,12 @@ export class Secretary {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToMany(() => Doctor, (doctor) => doctor.secretaries)
+  @ManyToMany(() => Doctor, (doctor) => doctor.secretaryDoctors)
   doctors: Doctor[];
+
+  @OneToMany(
+    () => SecretaryDoctor,
+    (secretaryDoctor) => secretaryDoctor.secretary,
+  )
+  secretaryDoctors: SecretaryDoctor[];
 }

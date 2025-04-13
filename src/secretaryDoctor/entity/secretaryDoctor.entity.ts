@@ -4,8 +4,8 @@ import {
   DeleteDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { User } from '../../user/entity/user.entity';
 import { Doctor } from '../../doctor/entity/doctor.entity';
+import { Secretary } from 'src/secretary/entity/secretary.entity';
 
 @Entity()
 export class SecretaryDoctor {
@@ -15,9 +15,9 @@ export class SecretaryDoctor {
   @DeleteDateColumn({ type: 'timestamp' })
   deletedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.secretaryDoctors)
-  secretary: User;
-
   @ManyToOne(() => Doctor, (doctor) => doctor.secretaryDoctors)
   doctor: Doctor;
+
+  @ManyToOne(() => Secretary, (secretary) => secretary.doctors)
+  secretary: Secretary;
 }
