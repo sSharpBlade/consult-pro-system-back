@@ -1,0 +1,60 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  DeleteDateColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
+import { Plan } from '../../plan/entity/plan.entity';
+import { Doctor } from 'src/doctor/entity/doctor.entity';
+import { Appointment } from 'src/appointment/entity/appointment.entity';
+import { ClinicPayment } from 'src/clinicPayment/entity/clinicPayment.entity';
+
+@Entity()
+export class Clinic {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ length: 100 })
+  name: string;
+
+  @Column('text')
+  address: string;
+
+  @Column('double precision')
+  lat: number;
+
+  @Column('double precision')
+  lng: number;
+
+  @Column({ default: true })
+  active: boolean;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ length: 20 })
+  openingDays: string;
+
+  @Column({ type: 'time' })
+  openingTime: string;
+
+  @Column({ type: 'time' })
+  closingTime: string;
+
+  @DeleteDateColumn({ type: 'timestamp' })
+  deletedAt: Date;
+
+  @ManyToOne(() => Plan, (plan) => plan.clinics)
+  plan: Plan;
+
+  @OneToMany(() => Doctor, (doctor) => doctor.clinic)
+  doctors: Doctor[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.clinic)
+  appointments: Appointment[];
+
+  @OneToMany(() => ClinicPayment, (clinicPayment) => clinicPayment.clinic)
+  payments: ClinicPayment[];
+}
