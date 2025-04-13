@@ -8,13 +8,19 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  SetMetadata,
 } from '@nestjs/common';
 import { DoctorsService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { Doctor } from './entity/doctor.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('doctors')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@SetMetadata('roles', ['doctor'])
 export class DoctorsController {
   constructor(private readonly doctorsService: DoctorsService) {}
 

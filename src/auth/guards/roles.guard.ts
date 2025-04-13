@@ -12,11 +12,20 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>(
+    // Obtener roles requeridos del handler primero, luego de la clase
+    const handlerRoles = this.reflector.get<string[]>(
       'roles',
       context.getHandler(),
     );
+    const classRoles = this.reflector.get<string[]>(
+      'roles',
+      context.getClass(),
+    );
 
+    // Combinar roles (handler anula a clase)
+    const requiredRoles = handlerRoles || classRoles;
+
+    // Si no hay roles requeridos, permitir acceso
     if (!requiredRoles) {
       return true;
     }
@@ -28,6 +37,7 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Cuenta desactivada');
     }
 
-    return requiredRoles.includes(user.role);
+    // Verificar si el usuario tiene al menos uno de los roles requeridos
+    return requiredRoles.some((role) => user.role === role);
   }
 }
