@@ -27,7 +27,7 @@ export class User {
   @Column({ length: 255 })
   password: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: 'patient' })
   role: 'admin' | 'patient' | 'doctor' | 'secretary';
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
