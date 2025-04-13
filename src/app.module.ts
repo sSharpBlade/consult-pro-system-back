@@ -1,8 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppointmentModule } from './appointment/appointment.module';
+import { ClinicModule } from './clinic/clinic.module';
+import { ClinicPaymentModule } from './clinicPayment/clinicpayment.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { PaymentReceiptModule } from './paymentReceipt/paymentreceipt.module';
+import { PlanModule } from './plan/plan.module';
+import { PrescriptionModule } from './prescription/prescription.module';
+import { SecretaryModule } from './secretary/secretary.module';
+import { UserModule } from './user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -17,7 +26,16 @@ import { ConfigModule } from '@nestjs/config';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([]),
+
+    AppointmentModule,
+    ClinicModule,
+    ClinicPaymentModule,
+    DoctorModule,
+    PaymentReceiptModule,
+    PlanModule,
+    PrescriptionModule,
+    SecretaryModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
