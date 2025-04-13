@@ -52,4 +52,27 @@ export class DoctorsController {
   async restore(@Param('id') id: string): Promise<void> {
     await this.doctorsService.restore(+id);
   }
+
+  @Post(':doctorId/secretaries/:secretaryId')
+  @HttpCode(HttpStatus.CREATED)
+  async addSecretary(
+    @Param('doctorId') doctorId: string,
+    @Param('secretaryId') secretaryId: string,
+  ) {
+    return this.doctorsService.addSecretary(+doctorId, +secretaryId);
+  }
+
+  @Delete(':doctorId/secretaries/:secretaryId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeSecretary(
+    @Param('doctorId') doctorId: string,
+    @Param('secretaryId') secretaryId: string,
+  ) {
+    await this.doctorsService.removeSecretary(+doctorId, +secretaryId);
+  }
+
+  @Get(':doctorId/secretaries')
+  async listSecretaries(@Param('doctorId') doctorId: string) {
+    return this.doctorsService.listSecretaries(+doctorId);
+  }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Doctor } from './entity/doctor.entity';
@@ -6,6 +10,7 @@ import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Clinic } from 'src/clinic/entity/clinic.entity';
+import { SecretaryDoctor } from 'src/secretaryDoctor/entity/secretaryDoctor.entity';
 
 @Injectable()
 export class DoctorsService {
@@ -16,6 +21,8 @@ export class DoctorsService {
     private usersRepository: Repository<User>,
     @InjectRepository(Clinic)
     private clinicsRepository: Repository<Clinic>,
+    @InjectRepository(SecretaryDoctor)
+    private secretaryDoctorRepository: Repository<SecretaryDoctor>,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
@@ -106,5 +113,66 @@ export class DoctorsService {
     if (result.affected === 0) {
       throw new NotFoundException(`Doctor with ID ${id} not found`);
     }
+  }
+
+  async addSecretary(doctorId: number, secretaryId: number) {
+    // Verificar que el secretario y el doctor existan
+    const [doctor, secretary] = await Promise.all([
+      this.doctorsRepository.findOne({
+        where: { id: doctorId, deletedAt: IsNull() },
+      }),
+      this.usersRepository.findOne({
+        where: { id: secretaryId, role: 'secretary', deletedAt: IsNull() },
+      }),
+    ]);
+
+    if (!doctor) throw new NotFoundException('Doctor not found');
+    if (!secretary)
+      throw new NotFoundException('Secretary not found or invalid role');
+
+    // Verificar si la relación ya existe
+    const existing = await this.secretaryDoctorRepository.findOne({
+      where: {
+        doctor: { id: doctorId },
+        secretary: { id: secretaryId },
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException(
+        'This secretary is already assigned to the doctor',
+      );
+    }
+
+    const relation = this.secretaryDoctorRepository.create({
+      doctor: { id: doctorId },
+      secretary: { id: secretaryId },
+    });
+
+    return this.secretaryDoctorRepository.save(relation);
+  }
+
+  async removeSecretary(doctorId: number, secretaryId: number) {
+    const result = await this.secretaryDoctorRepository.softDelete({
+      doctor: { id: doctorId },
+      secretary: { id: secretaryId },
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Assignment not found');
+    }
+  }
+
+  async listSecretaries(doctorId: number) {
+    const relations = await this.secretaryDoctorRepository.find({
+      where: {
+        doctor: { id: doctorId },
+        deletedAt: IsNull(),
+      },
+      relations: ['secretary'],
+    });
+
+    return relations.map((rel) => rel.secretary);
   }
 }
