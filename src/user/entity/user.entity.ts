@@ -50,7 +50,7 @@ export class User {
   
   @Column({
     name: 'created_by',
-    nullable: false
+    nullable: true 
   })
   createdBy: string;
 
