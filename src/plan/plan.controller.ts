@@ -19,11 +19,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('plans')
+@UseGuards(JwtAuthGuard)
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
   async create(@Body() createPlanDto: CreatePlanDto): Promise<Plan> {
     return this.plansService.create(createPlanDto);
@@ -40,7 +41,7 @@ export class PlansController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
   async update(
     @Param('id') id: string,
@@ -50,7 +51,7 @@ export class PlansController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
@@ -58,7 +59,7 @@ export class PlansController {
   }
 
   @Post(':id/restore')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async restore(@Param('id') id: string): Promise<void> {
