@@ -24,6 +24,7 @@ export class PrescriptionsService {
 
   async create(
     createPrescriptionDto: CreatePrescriptionDto,
+    currentUser?: any
   ): Promise<Prescription> {
     const [appointment, doctor] = await Promise.all([
       this.appointmentsRepository.findOne({
@@ -61,6 +62,7 @@ export class PrescriptionsService {
       document: createPrescriptionDto.document,
       appointment,
       doctor,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
 
     return this.prescriptionsRepository.save(prescription);
@@ -96,6 +98,7 @@ export class PrescriptionsService {
   async update(
     id: number,
     updatePrescriptionDto: UpdatePrescriptionDto,
+    currentUser?: any
   ): Promise<Prescription> {
     const prescription = await this.findOne(id);
 
@@ -119,7 +122,14 @@ export class PrescriptionsService {
     return this.prescriptionsRepository.save(updatedPrescription);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const prescription = await this.findOne(id);
+    if ('deletedBy' in prescription) {
+      await this.prescriptionsRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+    
     const result = await this.prescriptionsRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Prescription with ID ${id} not found`);

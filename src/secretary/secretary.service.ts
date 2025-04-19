@@ -16,13 +16,14 @@ export class SecretaryService {
     private doctorRepo: Repository<Doctor>,
   ) {}
 
-  async create(dto: CreateSecretaryDto) {
+  async create(dto: CreateSecretaryDto, currentUser?: any) {
     const doctors = await this.doctorRepo.findByIds(dto.doctorIds);
     const secretary = this.secretaryRepo.create({
       name: dto.name,
       phone: dto.phone,
       email: dto.email,
       doctors,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
     return this.secretaryRepo.save(secretary);
   }
@@ -43,7 +44,7 @@ export class SecretaryService {
     return secretary;
   }
 
-  async update(id: number, dto: UpdateSecretaryDto) {
+  async update(id: number, dto: UpdateSecretaryDto, currentUser?: any) {
     const secretary = await this.findOne(id);
 
     if (dto.doctorIds) {
@@ -51,13 +52,15 @@ export class SecretaryService {
       delete dto.doctorIds;
     }
 
+    // El lastModified se actualiza automáticamente por la configuración en la entidad
     Object.assign(secretary, dto);
     return this.secretaryRepo.save(secretary);
   }
 
-  async remove(id: number) {
+  async remove(id: number, currentUser?: any) {
     const secretary = await this.findOne(id);
     secretary.isActive = false;
+    secretary.deletedBy = currentUser ? String(currentUser.id) : 'system';
     return this.secretaryRepo.save(secretary);
   }
 }

@@ -8,7 +8,9 @@ import {
   Delete,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { SecretaryService } from './secretary.service';
 import { CreateSecretaryDto } from './dto/create-secretary.dto';
 import { UpdateSecretaryDto } from './dto/update-secretary.dto';
@@ -23,8 +25,8 @@ export class SecretaryController {
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin', 'doctor'])
-  create(@Body() dto: CreateSecretaryDto) {
-    return this.secretaryService.create(dto);
+  create(@Body() dto: CreateSecretaryDto, @Req() req) {
+    return this.secretaryService.create(dto, req.user);
   }
 
   @Get()
@@ -44,14 +46,14 @@ export class SecretaryController {
   @Patch(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin', 'doctor'])
-  update(@Param('id') id: string, @Body() dto: UpdateSecretaryDto) {
-    return this.secretaryService.update(+id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateSecretaryDto, @Req() req) {
+    return this.secretaryService.update(+id, dto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin','doctor'])
-  remove(@Param('id') id: string) {
-    return this.secretaryService.remove(+id);
+  remove(@Param('id') id: string, @Req() req) {
+    return this.secretaryService.remove(+id, req.user);
   }
 }

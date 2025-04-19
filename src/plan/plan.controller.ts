@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
 import { PlansService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -26,8 +27,11 @@ export class PlansController {
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
-  async create(@Body() createPlanDto: CreatePlanDto): Promise<Plan> {
-    return this.plansService.create(createPlanDto);
+  async create(
+    @Body() createPlanDto: CreatePlanDto,
+    @Req() req
+  ): Promise<Plan> {
+    return this.plansService.create(createPlanDto, req.user);
   }
 
   @Get()
@@ -46,16 +50,20 @@ export class PlansController {
   async update(
     @Param('id') id: string,
     @Body() updatePlanDto: UpdatePlanDto,
+    @Req() req
   ): Promise<Plan> {
-    return this.plansService.update(+id, updatePlanDto);
+    return this.plansService.update(+id, updatePlanDto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles',['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.plansService.remove(+id);
+  async remove(
+    @Param('id') id: string,
+    @Req() req
+  ): Promise<void> {
+    await this.plansService.remove(+id, req.user);
   }
 
   @Post(':id/restore')

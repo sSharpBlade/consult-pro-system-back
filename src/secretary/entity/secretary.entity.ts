@@ -29,6 +29,26 @@ export class Secretary {
   @CreateDateColumn()
   created_at: Date;
 
+  @Column({
+    name: 'created_by',
+    nullable: true  
+  })
+  createdBy: string;
+
+  @Column({
+    name: 'last_modified',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP'
+  })
+  lastModified: Date;
+
+  @Column({
+    name: 'deleted_by',
+    nullable: true  
+  })
+  deletedBy: string;
+
   @ManyToMany(() => Doctor, (doctor) => doctor.secretaryDoctors)
   doctors: Doctor[];
 

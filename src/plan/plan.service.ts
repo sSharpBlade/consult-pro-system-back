@@ -12,8 +12,11 @@ export class PlansService {
     private plansRepository: Repository<Plan>,
   ) {}
 
-  async create(createPlanDto: CreatePlanDto): Promise<Plan> {
-    const plan = this.plansRepository.create(createPlanDto);
+  async create(createPlanDto: CreatePlanDto, currentUser?: any): Promise<Plan> {
+    const plan = this.plansRepository.create({
+      ...createPlanDto,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
+    });
     return this.plansRepository.save(plan);
   }
 
@@ -30,13 +33,21 @@ export class PlansService {
     return plan;
   }
 
-  async update(id: number, updatePlanDto: UpdatePlanDto): Promise<Plan> {
+  async update(id: number, updatePlanDto: UpdatePlanDto, currentUser?: any): Promise<Plan> {
     const plan = await this.findOne(id);
     const updated = this.plansRepository.merge(plan, updatePlanDto);
+    // lastModified se actualiza automáticamente por la configuración en la entidad
     return this.plansRepository.save(updated);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const plan = await this.findOne(id);
+    if ('deletedBy' in plan) {
+      await this.plansRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+    
     const result = await this.plansRepository.softDelete(id);
     if (result.affected === 0)
       throw new NotFoundException(`Plan with ID ${id} not found`);

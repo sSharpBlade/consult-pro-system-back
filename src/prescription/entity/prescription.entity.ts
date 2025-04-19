@@ -19,8 +19,28 @@ export class Prescription {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  @Column({
+    name: 'created_by',
+    nullable: true  
+  })
+  createdBy: string;
+
+  @Column({
+    name: 'last_modified',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP'
+  })
+  lastModified: Date;
+
   @DeleteDateColumn({ type: 'timestamp' })
   deletedAt: Date;
+
+  @Column({
+    name: 'deleted_by',
+    nullable: true  
+  })
+  deletedBy: string;
 
   @ManyToOne(() => Appointment, (appointment) => appointment.prescription)
   appointment: Appointment;

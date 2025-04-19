@@ -11,7 +11,9 @@ import {
   Query,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { PrescriptionsService } from './prescription.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { UpdatePrescriptionDto } from './dto/update-prescription.dto';
@@ -29,8 +31,9 @@ export class PrescriptionsController {
   @SetMetadata('roles', ['admin','doctor'])
   async create(
     @Body() createPrescriptionDto: CreatePrescriptionDto,
+    @Req() req
   ): Promise<Prescription> {
-    return this.prescriptionsService.create(createPrescriptionDto);
+    return this.prescriptionsService.create(createPrescriptionDto, req.user);
   }
 
   @Get()
@@ -54,21 +57,24 @@ export class PrescriptionsController {
   async update(
     @Param('id') id: string,
     @Body() updatePrescriptionDto: UpdatePrescriptionDto,
+    @Req() req
   ): Promise<Prescription> {
-    return this.prescriptionsService.update(+id, updatePrescriptionDto);
+    return this.prescriptionsService.update(+id, updatePrescriptionDto, req.user);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin','doctor'])
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.prescriptionsService.remove(+id);
+  async remove(
+    @Param('id') id: string,
+    @Req() req
+  ): Promise<void> {
+    await this.prescriptionsService.remove(+id, req.user);
   }
 
   @Post(':id/restore')
   @HttpCode(HttpStatus.NO_CONTENT)
-  
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin','doctor'])
   async restore(@Param('id') id: string): Promise<void> {
