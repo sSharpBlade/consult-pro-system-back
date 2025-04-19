@@ -47,4 +47,24 @@ export class User {
     (secretaryDoctor) => secretaryDoctor.secretary,
   )
   secretaryDoctors: SecretaryDoctor[];
+  
+  @Column({
+    name: 'created_by',
+    nullable: false
+  })
+  createdBy: string;
+
+  @Column({
+    name: 'last_modified',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP'
+  })
+  lastModified: Date;
+
+  @Column({
+    name: 'deleted_by',
+    nullable: true  
+  })
+  deletedBy: string;
 }

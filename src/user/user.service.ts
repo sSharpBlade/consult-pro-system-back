@@ -13,12 +13,13 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto, currentUser?: any): Promise<User> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
       role: createUserDto.role as 'doctor' | 'admin' | 'patient' | 'secretary',
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
     return this.usersRepository.save(user);
   }
@@ -43,7 +44,7 @@ export class UsersService {
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto, currentUser?: any): Promise<User> {
     const user = await this.findOne(id);
 
     if (updateUserDto.password) {
@@ -57,7 +58,13 @@ export class UsersService {
     return this.usersRepository.save(updatedUser);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const user = await this.findOne(id);
+    if ('deletedBy' in user) {
+      await this.usersRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
     const result = await this.usersRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);

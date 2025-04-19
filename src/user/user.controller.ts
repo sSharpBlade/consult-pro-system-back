@@ -28,8 +28,8 @@ export class UsersController {
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto,@Req() req): Promise<User> {
+    return this.usersService.create(createUserDto,req.user);
   }
 
   @Get()
@@ -52,16 +52,17 @@ export class UsersController {
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @Req() req,
   ): Promise<User> {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(+id, updateUserDto, req.user);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.usersService.remove(+id);
+  async remove(@Param('id') id: string,@Req()req): Promise<void> {
+    await this.usersService.remove(+id,req.user);
   }
 
   @Post(':id/restore')
