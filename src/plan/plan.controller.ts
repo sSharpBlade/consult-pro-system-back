@@ -8,17 +8,23 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  SetMetadata,
 } from '@nestjs/common';
 import { PlansService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { Plan } from './entity/plan.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('plans')
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles',['admin'])
   async create(@Body() createPlanDto: CreatePlanDto): Promise<Plan> {
     return this.plansService.create(createPlanDto);
   }
@@ -34,6 +40,8 @@ export class PlansController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles',['admin'])
   async update(
     @Param('id') id: string,
     @Body() updatePlanDto: UpdatePlanDto,
@@ -42,12 +50,16 @@ export class PlansController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles',['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
     await this.plansService.remove(+id);
   }
 
   @Post(':id/restore')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @SetMetadata('roles',['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async restore(@Param('id') id: string): Promise<void> {
     await this.plansService.restore(+id);
