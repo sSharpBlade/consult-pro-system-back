@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
 import { DoctorsService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
@@ -26,8 +27,11 @@ export class DoctorsController {
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async create(@Body() createDoctorDto: CreateDoctorDto): Promise<Doctor> {
-    return this.doctorsService.create(createDoctorDto);
+  async create(
+    @Body() createDoctorDto: CreateDoctorDto,
+    @Req() req,
+  ): Promise<Doctor> {
+    return this.doctorsService.create(createDoctorDto, req.user);
   }
 
   @Get()
@@ -50,16 +54,17 @@ export class DoctorsController {
   async update(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
+    @Req() req,
   ): Promise<Doctor> {
-    return this.doctorsService.update(+id, updateDoctorDto);
+    return this.doctorsService.update(+id, updateDoctorDto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.doctorsService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req): Promise<void> {
+    await this.doctorsService.remove(+id, req.user);
   }
 
   @Post(':id/restore')

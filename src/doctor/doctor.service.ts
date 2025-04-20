@@ -25,7 +25,10 @@ export class DoctorsService {
     private secretaryDoctorRepository: Repository<SecretaryDoctor>,
   ) {}
 
-  async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
+  async create(
+    createDoctorDto: CreateDoctorDto,
+    currentUser?: any,
+  ): Promise<Doctor> {
     const user = await this.usersRepository.findOne({
       where: { id: createDoctorDto.userId, deletedAt: IsNull() },
     });
@@ -48,6 +51,7 @@ export class DoctorsService {
       specialization: createDoctorDto.specialization,
       user,
       clinic,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
     return this.doctorsRepository.save(doctor);
   }
@@ -70,7 +74,11 @@ export class DoctorsService {
     return doctor;
   }
 
-  async update(id: number, updateDoctorDto: UpdateDoctorDto): Promise<Doctor> {
+  async update(
+    id: number,
+    updateDoctorDto: UpdateDoctorDto,
+    currentUser?: any,
+  ): Promise<Doctor> {
     const doctor = await this.findOne(id);
 
     if (updateDoctorDto.userId) {
@@ -97,11 +105,21 @@ export class DoctorsService {
       doctor.clinic = clinic;
     }
 
+    // lastModified se actualiza automáticamente por la configuración en la entidad
     const updatedDoctor = this.doctorsRepository.merge(doctor, updateDoctorDto);
     return this.doctorsRepository.save(updatedDoctor);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const doctor = await this.findOne(id);
+
+    // Actualización de auditoría antes del soft delete
+    if ('deletedBy' in doctor) {
+      await this.doctorsRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+
     const result = await this.doctorsRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Doctor with ID ${id} not found`);
