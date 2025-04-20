@@ -19,27 +19,34 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('doctors')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@SetMetadata('roles', ['doctor'])
+@UseGuards(JwtAuthGuard)
 export class DoctorsController {
   constructor(private readonly doctorsService: DoctorsService) {}
 
   @Post()
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
   async create(@Body() createDoctorDto: CreateDoctorDto): Promise<Doctor> {
     return this.doctorsService.create(createDoctorDto);
   }
 
   @Get()
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin', 'patient', 'secretary'])
   async findAll(): Promise<Doctor[]> {
     return this.doctorsService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin', 'patient', 'secretary'])
   async findOne(@Param('id') id: string): Promise<Doctor> {
     return this.doctorsService.findOne(+id);
   }
 
   @Put(':id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin', 'doctor'])
   async update(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
@@ -48,18 +55,24 @@ export class DoctorsController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
     await this.doctorsService.remove(+id);
   }
 
   @Post(':id/restore')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async restore(@Param('id') id: string): Promise<void> {
     await this.doctorsService.restore(+id);
   }
 
   @Post(':doctorId/secretaries/:secretaryId')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
   @HttpCode(HttpStatus.CREATED)
   async addSecretary(
     @Param('doctorId') doctorId: string,
@@ -69,6 +82,8 @@ export class DoctorsController {
   }
 
   @Delete(':doctorId/secretaries/:secretaryId')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeSecretary(
     @Param('doctorId') doctorId: string,
@@ -78,6 +93,8 @@ export class DoctorsController {
   }
 
   @Get(':doctorId/secretaries')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin', 'doctor'])
   async listSecretaries(@Param('doctorId') doctorId: string) {
     return this.doctorsService.listSecretaries(+doctorId);
   }
