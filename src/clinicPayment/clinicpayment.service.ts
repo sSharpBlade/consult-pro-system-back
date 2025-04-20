@@ -19,7 +19,10 @@ export class ClinicPaymentsService {
     private clinicsRepository: Repository<Clinic>,
   ) {}
 
-  async create(createDto: CreateClinicPaymentDto): Promise<ClinicPayment> {
+  async create(
+    createDto: CreateClinicPaymentDto,
+    currentUser?: any,
+  ): Promise<ClinicPayment> {
     const clinic = await this.clinicsRepository.findOne({
       where: { id: createDto.clinicId, deletedAt: IsNull() },
     });
@@ -42,6 +45,7 @@ export class ClinicPaymentsService {
       endPeriod: createDto.endPeriod,
       method: createDto.method,
       clinic,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
 
     return this.clinicPaymentsRepository.save(payment);
@@ -77,6 +81,7 @@ export class ClinicPaymentsService {
   async update(
     id: number,
     updateDto: UpdateClinicPaymentDto,
+    currentUser?: any,
   ): Promise<ClinicPayment> {
     const payment = await this.findOne(id);
 
@@ -92,6 +97,7 @@ export class ClinicPaymentsService {
       payment.clinic = clinic;
     }
 
+    // lastModified se actualiza automáticamente por la configuración en la entidad
     const updatedPayment = this.clinicPaymentsRepository.merge(payment, {
       ...updateDto,
       status: updateDto.status as ClinicPayment['status'],
@@ -99,7 +105,16 @@ export class ClinicPaymentsService {
     return this.clinicPaymentsRepository.save(updatedPayment);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const payment = await this.findOne(id);
+
+    // Actualización de auditoría antes del soft delete
+    if ('deletedBy' in payment) {
+      await this.clinicPaymentsRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+
     const result = await this.clinicPaymentsRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Clinic payment with ID ${id} not found`);
