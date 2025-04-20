@@ -23,7 +23,9 @@ export class AppointmentsService {
 
   async create(
     createAppointmentDto: CreateAppointmentDto,
+    currentUser?: any,
   ): Promise<Appointment> {
+    // Validaciones de relaciones
     const patient = await this.usersRepository.findOne({
       where: { id: createAppointmentDto.patientId, deletedAt: IsNull() },
     });
@@ -51,13 +53,15 @@ export class AppointmentsService {
       );
     }
 
+    // Creación con auditoría
     const appointment = this.appointmentsRepository.create({
-      appointmentDate: createAppointmentDto.appointmentDate,
-      appointmentTime: createAppointmentDto.appointmentTime,
+      ...createAppointmentDto,
       patient,
       doctor,
       clinic,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
+
     return this.appointmentsRepository.save(appointment);
   }
 
@@ -82,9 +86,11 @@ export class AppointmentsService {
   async update(
     id: number,
     updateAppointmentDto: UpdateAppointmentDto,
+    currentUser?: any,
   ): Promise<Appointment> {
     const appointment = await this.findOne(id);
 
+    // Actualización de relaciones si vienen en el DTO
     if (updateAppointmentDto.patientId) {
       const patient = await this.usersRepository.findOne({
         where: { id: updateAppointmentDto.patientId, deletedAt: IsNull() },
@@ -121,6 +127,7 @@ export class AppointmentsService {
       appointment.clinic = clinic;
     }
 
+    // lastModified se actualiza automáticamente por la configuración en la entidad
     const updatedAppointment = this.appointmentsRepository.merge(appointment, {
       ...updateAppointmentDto,
       status: updateAppointmentDto.status as
@@ -128,10 +135,20 @@ export class AppointmentsService {
         | 'completed'
         | 'cancelled',
     });
+
     return this.appointmentsRepository.save(updatedAppointment);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const appointment = await this.findOne(id);
+
+    // Actualización de auditoría antes del soft delete
+    if ('deletedBy' in appointment) {
+      await this.appointmentsRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+
     const result = await this.appointmentsRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Appointment with ID ${id} not found`);

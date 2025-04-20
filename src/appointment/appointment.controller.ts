@@ -28,8 +28,9 @@ export class AppointmentsController {
   @SetMetadata('roles', ['doctor', 'patient'])
   async create(
     @Body() createAppointmentDto: CreateAppointmentDto,
+    @Req() req,
   ): Promise<Appointment> {
-    return this.appointmentsService.create(createAppointmentDto);
+    return this.appointmentsService.create(createAppointmentDto, req.user);
   }
 
   @Get()
@@ -52,16 +53,17 @@ export class AppointmentsController {
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
+    @Req() req,
   ): Promise<Appointment> {
-    return this.appointmentsService.update(+id, updateAppointmentDto);
+    return this.appointmentsService.update(+id, updateAppointmentDto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['doctor', 'patient'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.appointmentsService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req): Promise<void> {
+    await this.appointmentsService.remove(+id, req.user);
   }
 
   @Post(':id/restore')
