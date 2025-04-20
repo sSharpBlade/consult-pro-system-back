@@ -19,7 +19,10 @@ export class PaymentReceiptsService {
     private appointmentsRepository: Repository<Appointment>,
   ) {}
 
-  async create(createDto: CreatePaymentReceiptDto): Promise<PaymentReceipt> {
+  async create(
+    createDto: CreatePaymentReceiptDto,
+    currentUser?: any,
+  ): Promise<PaymentReceipt> {
     const appointment = await this.appointmentsRepository.findOne({
       where: { id: createDto.appointmentId, deletedAt: IsNull() },
     });
@@ -45,6 +48,7 @@ export class PaymentReceiptsService {
       amount: createDto.amount,
       method: createDto.method,
       appointment,
+      createdBy: currentUser ? String(currentUser.id) : 'system',
     });
 
     return this.paymentReceiptsRepository.save(paymentReceipt);
@@ -79,16 +83,29 @@ export class PaymentReceiptsService {
   async update(
     id: number,
     updateDto: UpdatePaymentReceiptDto,
+    currentUser?: any,
   ): Promise<PaymentReceipt> {
     const paymentReceipt = await this.findOne(id);
+
+    // lastModified se actualiza automáticamente por la configuración en la entidad
     const updated = this.paymentReceiptsRepository.merge(
       paymentReceipt,
       updateDto,
     );
+
     return this.paymentReceiptsRepository.save(updated);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: any): Promise<void> {
+    const paymentReceipt = await this.findOne(id);
+
+    // Actualización de auditoría antes del soft delete
+    if ('deletedBy' in paymentReceipt) {
+      await this.paymentReceiptsRepository.update(id, {
+        deletedBy: currentUser ? String(currentUser.id) : 'system',
+      });
+    }
+
     const result = await this.paymentReceiptsRepository.softDelete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Payment receipt with ID ${id} not found`);

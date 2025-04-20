@@ -11,6 +11,7 @@ import {
   Query,
   SetMetadata,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { PaymentReceiptsService } from './paymentreceipt.service';
 import { CreatePaymentReceiptDto } from './dto/create-paymentReceipt.dto';
@@ -31,8 +32,9 @@ export class PaymentReceiptsController {
   @SetMetadata('roles', ['doctor', 'patient'])
   async create(
     @Body() createDto: CreatePaymentReceiptDto,
+    @Req() req,
   ): Promise<PaymentReceipt> {
-    return this.paymentReceiptsService.create(createDto);
+    return this.paymentReceiptsService.create(createDto, req.user);
   }
 
   @Get()
@@ -60,16 +62,17 @@ export class PaymentReceiptsController {
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdatePaymentReceiptDto,
+    @Req() req,
   ): Promise<PaymentReceipt> {
-    return this.paymentReceiptsService.update(+id, updateDto);
+    return this.paymentReceiptsService.update(+id, updateDto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['doctor'])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.paymentReceiptsService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req): Promise<void> {
+    await this.paymentReceiptsService.remove(+id, req.user);
   }
 
   @Post(':id/restore')
