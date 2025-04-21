@@ -16,6 +16,8 @@ jobs:
   displayName: 'Build NestJS API'
   pool:
     vmImage: ubuntu-latest
+    demands:
+      - Agent.OS -equals Linux
   steps:
   - task: NodeTool@0
     inputs:
