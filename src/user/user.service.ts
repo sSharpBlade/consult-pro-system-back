@@ -4,7 +4,7 @@ import { IsNull, Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +25,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({ where: { deletedAt: IsNull() } });
+    return this.usersRepository.find({ withDeleted: true });
   }
 
   async findOne(id: number): Promise<User> {
