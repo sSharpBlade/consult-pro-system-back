@@ -1,49 +1,44 @@
 trigger:
-- develop  # Cambiado a develop ya que mencionas que es tu rama principal
+- develop  # O la rama que uses para CI
 
 variables:
   NODE_ENV: production
-  # Azure Key Vault en lugar de variables directas
-  DB_HOST: $(DB_HOST)
-  DB_PORT: $(DB_PORT)
-  DB_USER: $(DB_USER)
-  DB_PASSWORD: $(DB_PASSWORD)
-  DB_NAME: $(DB_NAME)
-  JWT_SECRET: $(JWT_SECRET)
 
-jobs:
-- job: Build_NestJS_API
-  displayName: 'Build NestJS API'
-  pool:
-    vmImage: ubuntu-latest
-    demands:
-      - Agent.OS -equals Linux
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '20.x'
-    displayName: 'Install Node.js'
+pool:
+  vmImage: ubuntu-latest
 
-  - script: npm ci
-    displayName: 'Install dependencies (npm ci)'
+container: node:20-alpine  # Imagen ligera con Node 20
 
-  - script: npm run build
-    displayName: 'Build NestJS project'
+steps:
+- script: echo "Instalando dependencias..."
+  displayName: 'Preparar entorno'
 
-  # Opcional: Publicar el artefacto (dist/)
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish build artifacts'
-    inputs:
-      PathtoPublish: 'dist'
-      ArtifactName: 'drop'
+# Paso para manejar variables de entorno (alternativa segura a .env)
+- bash: |
+    cat << 'EOF' > .env
+    DB_HOST=$(DB_HOST)
+    DB_PORT=$(DB_PORT)
+    DB_USER=$(DB_USER)
+    DB_PASSWORD=$(DB_PASSWORD)
+    DB_NAME=$(DB_NAME)
+    JWT_SECRET=$(JWT_SECRET)
+    EOF
+  displayName: 'Crear archivo .env'
+  env:
+    DB_HOST: $(DB_HOST)
+    DB_PORT: $(DB_PORT)
+    DB_USER: $(DB_USER)
+    DB_PASSWORD: $(DB_PASSWORD)
+    DB_NAME: $(DB_NAME)
+    JWT_SECRET: $(JWT_SECRET)
 
-# Paso para deploy (depende de dónde vayas a desplegar)
-# Ejemplo básico para Azure Web App:
-# - task: AzureWebApp@1
-#   inputs:
-#     azureSubscription: 'your-subscription'
-#     appType: 'webAppLinux'
-#     appName: 'your-app-name'
-#     runtimeStack: 'NODE|20-lts'
-#     package: 'dist'
-#     startUpCommand: 'npm run start:prod'
+- script: |
+    npm ci
+    npm run build
+  displayName: 'Instalar dependencias y construir'
+
+# Opcional: Publicar el artefacto construido
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'dist'
+    ArtifactName: 'drop'
