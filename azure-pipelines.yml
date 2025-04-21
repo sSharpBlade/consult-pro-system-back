@@ -4,6 +4,8 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
+  demands:
+    - Agent.OS -equals Linux
 
 variables:
   NODE_ENV: production
