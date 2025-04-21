@@ -1,0 +1,53 @@
+trigger:
+- main
+- develop  # Cambiado a develop ya que mencionas que es tu rama principal
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_ENV: production
+  # Azure Key Vault en lugar de variables directas
+  DB_HOST: $(DB_HOST)
+  DB_PORT: $(DB_PORT)
+  DB_USER: $(DB_USER)
+  DB_PASSWORD: $(DB_PASSWORD)
+  DB_NAME: $(DB_NAME)
+  JWT_SECRET: $(JWT_SECRET)
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
+
+- script: npm ci
+  displayName: 'Install dependencies'
+  # npm ci es mejor para CI/CD que npm install (instala exactamente lo de package-lock.json)
+
+- script: npm run build
+  displayName: 'Build project'
+
+# Opcional: Linting si lo deseas (aunque no tengas tests)
+- script: npm run lint
+  displayName: 'Run linting'
+  continueOnError: true  # Para que no falle el pipeline si hay warnings
+
+# Paso para publicar el artefacto (opcional pero recomendado)
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifact'
+  inputs:
+    PathtoPublish: 'dist'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+# Paso para deploy (depende de dónde vayas a desplegar)
+# Ejemplo básico para Azure Web App:
+# - task: AzureWebApp@1
+#   inputs:
+#     azureSubscription: 'your-subscription'
+#     appType: 'webAppLinux'
+#     appName: 'your-app-name'
+#     runtimeStack: 'NODE|20-lts'
+#     package: 'dist'
+#     startUpCommand: 'npm run start:prod'
