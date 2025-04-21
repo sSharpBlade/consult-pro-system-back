@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
