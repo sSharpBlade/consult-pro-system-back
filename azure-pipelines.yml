@@ -1,27 +1,43 @@
 trigger:
-- develop
+- develop  # Cambiado de main a develop según tu rama actual
 
 pool:
-  name: my-nestjs-agent
-  demands:
-  - npm
-  - node.js
+  name: my-nestjs-agent  # Usando tu agent pool personalizado
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_ENV: production
 
 steps:
-# Paso crítico faltante
-- checkout: self
-  fetchDepth: 1
-  displayName: 'Checkout código'
+- task: NodeTool@0
+  inputs:
+    versionSpec: '20.x'
+  displayName: 'Install Node.js'
 
+- script: npm ci
+  displayName: 'Install dependencies'
+  # npm ci es mejor para CI/CD que npm install (instala exactamente lo de package-lock.json)
+
+- script: npm run build
+  displayName: 'Build project'
+
+# Opcional: Linting (si quieres verificar calidad de código)
+- script: npm run lint
+  displayName: 'Run linting'
+  condition: succeeded()  # Solo si el paso anterior tuvo éxito
+
+# Paso para manejar variables de entorno (importante para producción)
 - task: Bash@3
-  displayName: 'Configurar .env'
+  displayName: 'Setup environment variables'
   inputs:
     targetType: 'inline'
     script: |
-      echo "DB_HOST=$(DB_HOST)" > .env
+      echo "DB_HOST=$(DB_HOST)" >> .env
       echo "DB_PORT=$(DB_PORT)" >> .env
-      # ... resto de variables
-      chmod 600 .env
+      echo "DB_USER=$(DB_USER)" >> .env
+      echo "DB_PASSWORD=$(DB_PASSWORD)" >> .env
+      echo "DB_NAME=$(DB_NAME)" >> .env
+      echo "JWT_SECRET=$(JWT_SECRET)" >> .env
   env:
     DB_HOST: $(DB_HOST)
     DB_PORT: $(DB_PORT)
@@ -30,12 +46,7 @@ steps:
     DB_NAME: $(DB_NAME)
     JWT_SECRET: $(JWT_SECRET)
 
-- script: |
-    npm ci
-    npm run build
-  displayName: 'Instalar y construir'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: 'dist'
-    ArtifactName: 'drop'
+# Paso para ejecutar la aplicación (opcional, dependiendo de tu despliegue)
+- script: npm run start:prod
+  displayName: 'Run application'
+  condition: succeeded()  # Solo si todo lo anterior tuvo éxito
