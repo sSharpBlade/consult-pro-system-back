@@ -1,29 +1,42 @@
 trigger:
-- develop  # O la rama que uses para CI
+- develop  # Rama que activará el pipeline
 
 variables:
   NODE_ENV: production
 
 pool:
-  vmImage: ubuntu-latest
-
-container: node:20-alpine  # Imagen ligera con Node 20
+  name: my-nestjs-agent  # Nombre del pool de agentes auto-hospedados que creaste
+  demands:
+  - npm
+  - node.js
 
 steps:
 - script: echo "Instalando dependencias..."
   displayName: 'Preparar entorno'
 
-# Paso para manejar variables de entorno (alternativa segura a .env)
-- bash: |
-    cat << 'EOF' > .env
-    DB_HOST=$(DB_HOST)
-    DB_PORT=$(DB_PORT)
-    DB_USER=$(DB_USER)
-    DB_PASSWORD=$(DB_PASSWORD)
-    DB_NAME=$(DB_NAME)
-    JWT_SECRET=$(JWT_SECRET)
-    EOF
-  displayName: 'Crear archivo .env'
+# Paso mejorado para variables de entorno (más seguro)
+- task: Bash@3
+  displayName: 'Configurar variables de entorno'
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Crear estructura de directorios si no existe
+      mkdir -p config/env
+      
+      # Generar archivo .env con permisos restringidos
+      cat << 'EOF' > config/env/.env
+      DB_HOST=$DB_HOST
+      DB_PORT=$DB_PORT
+      DB_USER=$DB_USER
+      DB_PASSWORD=$DB_PASSWORD
+      DB_NAME=$DB_NAME
+      JWT_SECRET=$JWT_SECRET
+      NODE_ENV=production
+      EOF
+      
+      # Establecer permisos seguros
+      chmod 600 config/env/.env
+      echo "Archivo .env creado con permisos restringidos"
   env:
     DB_HOST: $(DB_HOST)
     DB_PORT: $(DB_PORT)
@@ -33,12 +46,22 @@ steps:
     JWT_SECRET: $(JWT_SECRET)
 
 - script: |
-    npm ci
+    # Instalar dependencias con cache
+    npm ci --prefer-offline
+    
+    # Construir la aplicación
     npm run build
-  displayName: 'Instalar dependencias y construir'
+    
+    # Verificar la estructura generada
+    ls -la dist/
+  displayName: 'Instalar y construir'
+  env:
+    NODE_OPTIONS: "--max_old_space_size=4096"  # Aumentar memoria para Node si es necesario
 
-# Opcional: Publicar el artefacto construido
+# Publicar artefactos con filtro de contenido
 - task: PublishBuildArtifacts@1
+  displayName: 'Publicar artefactos'
   inputs:
     PathtoPublish: 'dist'
-    ArtifactName: 'drop'
+    ArtifactName: 'nestjs-build'
+    publishLocation: 'container'
