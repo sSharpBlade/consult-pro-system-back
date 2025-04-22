@@ -2,7 +2,7 @@ trigger:
 - develop
 
 pool:
-  name: my-nestjs-agent
+  vmImage: 'ubuntu-latest'
 
 steps:
 - script: echo "Acción"
