@@ -1,0 +1,83 @@
+# azure-pipelines-ci.yml
+# Se ejecuta automáticamente en cada push a develop
+
+name: $(Date:yyyyMMdd)$(Rev:.r)-CI
+
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    exclude:
+      - README.md
+      - .gitignore
+
+pr:
+  branches:
+    include:
+      - develop
+
+variables:
+  nodeVersion: '18.x'
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  NODE_ENV: 'test'
+  
+  # Variables de base de datos para testing
+  DB_HOST: 'aws-0-us-east-2.pooler.supabase.com'
+  DB_PORT: '6543'
+  DB_NAME: 'postgres'
+  DB_USER: 'postgres.sxrwtyedfkhgyywdepmn'
+  DB_PASSWORD: '9dWUy3nmw7iYApNr'
+  JWT_SECRET: '3$AMVi5*&JpCgLdoJXpD'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '$(nodeVersion)'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install -g npm@latest
+    npm install -g @nestjs/cli
+  displayName: 'Install NestJS CLI'
+
+- checkout: self
+  clean: true
+  fetchDepth: 1
+
+- task: Cache@2
+  inputs:
+    key: 'npm | "$(Agent.OS)" | package-lock.json'
+    restoreKeys: |
+      npm | "$(Agent.OS)"
+    path: $(npm_config_cache)
+  displayName: 'Cache npm dependencies'
+
+- script: npm ci
+  workingDirectory: $(workingDirectory)
+  displayName: 'Install dependencies'
+
+- script: npm run lint
+  workingDirectory: $(workingDirectory)
+  displayName: 'Run linting'
+
+- script: npm run build
+  workingDirectory: $(workingDirectory)
+  displayName: 'Build project'
+
+- script: npm run test
+  workingDirectory: $(workingDirectory)
+  displayName: 'Run tests'
+  env:
+    DB_USER: $(DB_USER_TEST)  # Configurar en variables de pipeline
+    DB_PASSWORD: $(DB_PASSWORD_TEST)  # Configurar en variables de pipeline
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/test-results.xml'
+    testRunTitle: 'NestJS Unit Tests'
+  condition: succeededOrFailed()
+  displayName: 'Publish test results'
