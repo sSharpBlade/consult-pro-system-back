@@ -1,42 +1,27 @@
 trigger:
-- develop  # Rama que activará el pipeline
-
-variables:
-  NODE_ENV: production
+- develop
 
 pool:
-  name: my-nestjs-agent  # Nombre del pool de agentes auto-hospedados que creaste
+  name: my-nestjs-agent
   demands:
   - npm
   - node.js
 
 steps:
-- script: echo "Instalando dependencias..."
-  displayName: 'Preparar entorno'
+# Paso crítico faltante
+- checkout: self
+  fetchDepth: 1
+  displayName: 'Checkout código'
 
-# Paso mejorado para variables de entorno (más seguro)
 - task: Bash@3
-  displayName: 'Configurar variables de entorno'
+  displayName: 'Configurar .env'
   inputs:
     targetType: 'inline'
     script: |
-      # Crear estructura de directorios si no existe
-      mkdir -p config/env
-      
-      # Generar archivo .env con permisos restringidos
-      cat << 'EOF' > config/env/.env
-      DB_HOST=$DB_HOST
-      DB_PORT=$DB_PORT
-      DB_USER=$DB_USER
-      DB_PASSWORD=$DB_PASSWORD
-      DB_NAME=$DB_NAME
-      JWT_SECRET=$JWT_SECRET
-      NODE_ENV=production
-      EOF
-      
-      # Establecer permisos seguros
-      chmod 600 config/env/.env
-      echo "Archivo .env creado con permisos restringidos"
+      echo "DB_HOST=$(DB_HOST)" > .env
+      echo "DB_PORT=$(DB_PORT)" >> .env
+      # ... resto de variables
+      chmod 600 .env
   env:
     DB_HOST: $(DB_HOST)
     DB_PORT: $(DB_PORT)
@@ -46,22 +31,11 @@ steps:
     JWT_SECRET: $(JWT_SECRET)
 
 - script: |
-    # Instalar dependencias con cache
-    npm ci --prefer-offline
-    
-    # Construir la aplicación
+    npm ci
     npm run build
-    
-    # Verificar la estructura generada
-    ls -la dist/
   displayName: 'Instalar y construir'
-  env:
-    NODE_OPTIONS: "--max_old_space_size=4096"  # Aumentar memoria para Node si es necesario
 
-# Publicar artefactos con filtro de contenido
 - task: PublishBuildArtifacts@1
-  displayName: 'Publicar artefactos'
   inputs:
     PathtoPublish: 'dist'
-    ArtifactName: 'nestjs-build'
-    publishLocation: 'container'
+    ArtifactName: 'drop'
