@@ -70,7 +70,6 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Primero verifica si está usando contraseña temporal
     if (
       user.tempPassword &&
       user.tempPasswordExpires &&
@@ -91,7 +90,7 @@ export class AuthService {
         return {
           accessToken,
           user: userWithoutPassword,
-          isTempPassword: true, // Indica que es login temporal
+          isTempPassword: true,
         };
       }
     }
@@ -111,7 +110,7 @@ export class AuthService {
     return {
       accessToken,
       user: userWithoutPassword,
-      isTempPassword: false, // Indica que no es temporal
+      isTempPassword: false,
     };
   }
 
@@ -138,7 +137,6 @@ export class AuthService {
     });
 
     if (!user) {
-      // No revelamos si el usuario existe o no por seguridad
       return {
         message: 'Si el correo existe, se ha enviado un enlace de recuperación',
       };
@@ -149,14 +147,12 @@ export class AuthService {
     const tempPasswordExpires = new Date();
     tempPasswordExpires.setHours(tempPasswordExpires.getHours() + 2);
 
-    // Guardar el token temporal en la base de datos
     await this.userRepository.update(user.id, {
       tempPassword: await bcrypt.hash(tempPassword, 10),
       tempPasswordExpires,
     });
 
     try {
-      // Enviar email con la contraseña temporal
       await this.mailService.sendPasswordResetEmail(user.email, tempPassword);
 
       return {
@@ -192,7 +188,6 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido');
     }
 
-    // Actualizar la contraseña y limpiar los campos temporales
     user.password = await bcrypt.hash(resetPasswordDto.newPassword, 10);
     user.tempPassword = null;
     user.tempPasswordExpires = null;
