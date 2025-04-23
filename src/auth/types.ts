@@ -14,3 +14,9 @@ export interface JwtPayload {
 export interface AuthenticatedRequest extends Request {
   user: User;
 }
+
+export interface LoginResponse {
+  accessToken: string;
+  user: Omit<User, 'password' | 'tempPassword' | 'tempPasswordExpires'>;
+  isTempPassword?: boolean;
+}

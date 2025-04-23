@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsEmail,
   IsIn,
+  IsOptional,
 } from 'class-validator';
 import { User } from '../../user/entity/user.entity';
 
@@ -29,4 +30,19 @@ export class RegisterDto {
 
   @IsIn(['admin', 'patient', 'doctor', 'secretary'])
   role: User['role'];
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(20)
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  image?: string;
 }
