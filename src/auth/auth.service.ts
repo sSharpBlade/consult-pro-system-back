@@ -1,16 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { IsNull, Repository, Not } from 'typeorm';
 import { User } from '../user/entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
+import * as crypto from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload } from './types';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { MailService } from './mail.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +25,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -45,17 +53,66 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email, deletedAt: IsNull() },
-      select: ['id', 'email', 'password', 'role', 'dni', 'name', 'createdAt'],
+      select: [
+        'id',
+        'email',
+        'password',
+        'role',
+        'dni',
+        'name',
+        'createdAt',
+        'tempPassword',
+        'tempPasswordExpires',
+      ],
     });
 
-    if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
+    if (!user) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // Primero verifica si está usando contraseña temporal
+    if (
+      user.tempPassword &&
+      user.tempPasswordExpires &&
+      new Date() < user.tempPasswordExpires
+    ) {
+      const isValidTempPassword = await bcrypt.compare(
+        loginDto.password,
+        user.tempPassword,
+      );
+      if (isValidTempPassword) {
+        const accessToken = this.generateToken(user);
+        const {
+          password,
+          tempPassword,
+          tempPasswordExpires,
+          ...userWithoutPassword
+        } = user;
+        return {
+          accessToken,
+          user: userWithoutPassword,
+          isTempPassword: true, // Indica que es login temporal
+        };
+      }
+    }
+
+    // Si no es contraseña temporal, verifica la contraseña normal
+    if (!(await bcrypt.compare(loginDto.password, user.password))) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const accessToken = this.generateToken(user);
-    const { password, ...userWithoutPassword } = user;
-
-    return { accessToken, user: userWithoutPassword };
+    const {
+      password,
+      tempPassword,
+      tempPasswordExpires,
+      ...userWithoutPassword
+    } = user;
+    return {
+      accessToken,
+      user: userWithoutPassword,
+      isTempPassword: false, // Indica que no es temporal
+    };
   }
 
   async validateUser(userId: number): Promise<User | null> {
@@ -73,5 +130,74 @@ export class AuthService {
       name: user.name,
     };
     return this.jwtService.sign(payload);
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const user = await this.userRepository.findOne({
+      where: { email: forgotPasswordDto.email, deletedAt: IsNull() },
+    });
+
+    if (!user) {
+      // No revelamos si el usuario existe o no por seguridad
+      return {
+        message: 'Si el correo existe, se ha enviado un enlace de recuperación',
+      };
+    }
+
+    // Generar token temporal y fecha de expiración (2 horas)
+    const tempPassword = crypto.randomBytes(8).toString('hex');
+    const tempPasswordExpires = new Date();
+    tempPasswordExpires.setHours(tempPasswordExpires.getHours() + 2);
+
+    // Guardar el token temporal en la base de datos
+    await this.userRepository.update(user.id, {
+      tempPassword: await bcrypt.hash(tempPassword, 10),
+      tempPasswordExpires,
+    });
+
+    try {
+      // Enviar email con la contraseña temporal
+      await this.mailService.sendPasswordResetEmail(user.email, tempPassword);
+
+      return {
+        message: 'Si el correo existe, se ha enviado un enlace de recuperación',
+      };
+    } catch (error) {
+      console.error('Error enviando email:', error);
+      throw new Error('Ocurrió un error al enviar el email de recuperación');
+    }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const user = await this.userRepository.findOne({
+      where: {
+        tempPassword: Not(IsNull()),
+        tempPasswordExpires: Not(IsNull()),
+        deletedAt: IsNull(),
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Token inválido o expirado');
+    }
+
+    if (user.tempPasswordExpires && new Date() > user.tempPasswordExpires) {
+      throw new BadRequestException('El token ha expirado');
+    }
+
+    if (
+      user.tempPassword &&
+      !(await bcrypt.compare(resetPasswordDto.tempPassword, user.tempPassword))
+    ) {
+      throw new UnauthorizedException('Token inválido');
+    }
+
+    // Actualizar la contraseña y limpiar los campos temporales
+    user.password = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    user.tempPassword = null;
+    user.tempPasswordExpires = null;
+    await this.userRepository.save(user);
+
+    return { message: 'Contraseña actualizada correctamente' };
   }
 }
