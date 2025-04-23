@@ -24,8 +24,32 @@ export class User {
   @Column({ length: 100, unique: true })
   email: string;
 
+  @Column({ length: 10, nullable: true })
+  phone: string;
+
+  @Column({ length: 255, nullable: true })
+  address: string;
+
+  @Column({ length: 255, nullable: true })
+  image: string;
+
   @Column({ length: 255 })
   password: string;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'temp_password',
+  })
+  tempPassword: string | null;
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    name: 'temp_password_expires',
+  })
+  tempPasswordExpires: Date | null;
 
   @Column({ length: 20, default: 'patient' })
   role: 'admin' | 'patient' | 'doctor' | 'secretary';
@@ -47,7 +71,7 @@ export class User {
     (secretaryDoctor) => secretaryDoctor.secretary,
   )
   secretaryDoctors: SecretaryDoctor[];
-  
+
   @Column({
     name: 'created_by',
     nullable: true,
@@ -58,13 +82,13 @@ export class User {
     name: 'last_modified',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   lastModified: Date;
 
   @Column({
     name: 'deleted_by',
-    nullable: true  
+    nullable: true,
   })
   deletedBy: string;
 }
