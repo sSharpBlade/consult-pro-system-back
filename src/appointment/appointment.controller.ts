@@ -1,17 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  SetMetadata,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, 
+  HttpCode, HttpStatus, UseGuards, SetMetadata, Req, Query } from '@nestjs/common';
 import { AppointmentsService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -26,7 +14,7 @@ export class AppointmentsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['doctor', 'patient'])
+  @SetMetadata('roles', ['doctor', 'patient', 'admin'])
   async create(
     @Body() createAppointmentDto: CreateAppointmentDto,
     @Req() req,
@@ -36,7 +24,7 @@ export class AppointmentsController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['doctor', 'patient', 'secretary'])
+  @SetMetadata('roles', ['doctor', 'patient', 'secretary', 'admin'])
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsService.findAll();
   }
@@ -73,5 +61,54 @@ export class AppointmentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async restore(@Param('id') id: string): Promise<void> {
     await this.appointmentsService.restore(+id);
+  }
+
+  @Get('filter/by')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'patient', 'secretary', 'admin'])
+  async findByFilters(
+    @Query('doctorId') doctorId?: string,
+    @Query('patientId') patientId?: string,
+    @Query('clinicId') clinicId?: string,
+    @Query('date') date?: string,
+    @Query('status') status?: string,
+  ): Promise<Appointment[]> {
+    const filters: any = {};
+    
+    if (doctorId) filters.doctorId = +doctorId;
+    if (patientId) filters.patientId = +patientId;
+    if (clinicId) filters.clinicId = +clinicId;
+    if (date) filters.date = date;
+    if (status) filters.status = status;
+    
+    return this.appointmentsService.findByFilters(filters);
+  }
+
+  @Get('doctor/:id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'secretary', 'admin'])
+  async findByDoctor(@Param('id') doctorId: string): Promise<Appointment[]> {
+    return this.appointmentsService.findByFilters({ doctorId: +doctorId });
+  }
+
+  @Get('patient/:id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['patient', 'doctor', 'secretary', 'admin'])
+  async findByPatient(@Param('id') patientId: string): Promise<Appointment[]> {
+    return this.appointmentsService.findByFilters({ patientId: +patientId });
+  }
+
+  @Get('clinic/:id')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'secretary', 'admin'])
+  async findByClinic(@Param('id') clinicId: string): Promise<Appointment[]> {
+    return this.appointmentsService.findByFilters({ clinicId: +clinicId });
+  }
+
+  @Get('date/:date')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'secretary', 'admin'])
+  async findByDate(@Param('date') date: string): Promise<Appointment[]> {
+    return this.appointmentsService.findByFilters({ date });
   }
 }

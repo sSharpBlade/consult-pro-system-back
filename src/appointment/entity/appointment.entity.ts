@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  DeleteDateColumn,
-  ManyToOne,
-  OneToOne,
-} from 'typeorm';
+import {Entity,PrimaryGeneratedColumn,Column,DeleteDateColumn,ManyToOne,OneToOne,} from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Clinic } from 'src/clinic/entity/clinic.entity';

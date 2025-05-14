@@ -21,17 +21,14 @@ export class AppointmentsService {
     private clinicsRepository: Repository<Clinic>,
   ) {}
 
-  async create(
-    createAppointmentDto: CreateAppointmentDto,
-    currentUser?: any,
-  ): Promise<Appointment> {
-    // Validaciones de relaciones
+  async create(createAppointmentDto: CreateAppointmentDto,currentUser?: any,): Promise<Appointment> 
+  {
     const patient = await this.usersRepository.findOne({
       where: { id: createAppointmentDto.patientId, deletedAt: IsNull() },
     });
     if (!patient) {
       throw new NotFoundException(
-        `Patient with ID ${createAppointmentDto.patientId} not found`,
+        `El paciente con el ID ${createAppointmentDto.patientId} no se encuentra`,
       );
     }
 
@@ -40,7 +37,7 @@ export class AppointmentsService {
     });
     if (!doctor) {
       throw new NotFoundException(
-        `Doctor with ID ${createAppointmentDto.doctorId} not found`,
+        `El doctor con el ID ${createAppointmentDto.doctorId} no se encuentra`,
       );
     }
 
@@ -49,11 +46,16 @@ export class AppointmentsService {
     });
     if (!clinic) {
       throw new NotFoundException(
-        `Clinic with ID ${createAppointmentDto.clinicId} not found`,
+        `La clinica con el ID ${createAppointmentDto.clinicId} no se encuentra`,
       );
     }
 
-    // Creación con auditoría
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(createAppointmentDto.appointmentDate)) {
+      throw new NotFoundException(
+        `Debe de ingresar una fecha válida en el formato YYYY-MM-DD`,
+      );
+    }
+
     const appointment = this.appointmentsRepository.create({
       ...createAppointmentDto,
       patient,
@@ -83,14 +85,10 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async update(
-    id: number,
-    updateAppointmentDto: UpdateAppointmentDto,
-    currentUser?: any,
-  ): Promise<Appointment> {
+  async update(id: number,updateAppointmentDto: UpdateAppointmentDto,currentUser?: any,): Promise<Appointment>
+   {
     const appointment = await this.findOne(id);
 
-    // Actualización de relaciones si vienen en el DTO
     if (updateAppointmentDto.patientId) {
       const patient = await this.usersRepository.findOne({
         where: { id: updateAppointmentDto.patientId, deletedAt: IsNull() },
@@ -127,7 +125,6 @@ export class AppointmentsService {
       appointment.clinic = clinic;
     }
 
-    // lastModified se actualiza automáticamente por la configuración en la entidad
     const updatedAppointment = this.appointmentsRepository.merge(appointment, {
       ...updateAppointmentDto,
       status: updateAppointmentDto.status as
@@ -142,7 +139,6 @@ export class AppointmentsService {
   async remove(id: number, currentUser?: any): Promise<void> {
     const appointment = await this.findOne(id);
 
-    // Actualización de auditoría antes del soft delete
     if ('deletedBy' in appointment) {
       await this.appointmentsRepository.update(id, {
         deletedBy: currentUser ? String(currentUser.id) : 'system',
@@ -161,4 +157,33 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
     }
   }
+
+  async findByFilters(filters: {doctorId?: number;patientId?: number;clinicId?: number;date?: string;status?: string;}): Promise<Appointment[]> 
+  {
+    const query = this.appointmentsRepository.createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .leftJoinAndSelect('appointment.clinic', 'clinic')
+      .where('appointment.deletedAt IS NULL');
+    
+    if (filters.doctorId) {
+      query.andWhere('doctor.id = :doctorId', { doctorId: filters.doctorId });
+    }
+    if (filters.patientId) {
+      query.andWhere('patient.id = :patientId', { patientId: filters.patientId });
+    }
+    if (filters.clinicId) {
+      query.andWhere('clinic.id = :clinicId', { clinicId: filters.clinicId });
+    }
+    if (filters.date) {
+      query.andWhere('appointment.appointmentDate = :date', { date: filters.date });
+    }
+    if (filters.status) {
+      query.andWhere('appointment.status = :status', { status: filters.status });
+    }
+    
+    return query.getMany();
+  }
+
+  
 }

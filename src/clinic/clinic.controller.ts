@@ -1,17 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  SetMetadata,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import {Controller,Get,Post,Body,Param,Put,Delete,HttpCode,HttpStatus,SetMetadata,UseGuards,Req} from '@nestjs/common';
 import { ClinicsService } from './clinic.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
