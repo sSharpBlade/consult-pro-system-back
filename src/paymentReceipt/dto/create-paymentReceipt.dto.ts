@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsPositive } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsPositive, IsIn } from 'class-validator';
 
 export class CreatePaymentReceiptDto {
   @IsNumber()
@@ -10,6 +10,6 @@ export class CreatePaymentReceiptDto {
   amount: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsIn(['efectivo', 'tarjeta débito', 'tarjeta crédito', 'transferencia'])
   method: string;
 }

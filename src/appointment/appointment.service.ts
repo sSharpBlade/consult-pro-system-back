@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Appointment } from './entity/appointment.entity';
@@ -69,14 +69,14 @@ export class AppointmentsService {
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsRepository.find({
       where: { deletedAt: IsNull() },
-      relations: ['patient', 'doctor', 'clinic'],
+      relations: ['patient','doctor','clinic','prescription','paymentReceipt'],
     });
   }
 
   async findOne(id: number): Promise<Appointment> {
     const appointment = await this.appointmentsRepository.findOne({
       where: { id, deletedAt: IsNull() },
-      relations: ['patient', 'doctor', 'clinic', 'prescription'],
+      relations: ['patient','doctor','clinic','prescription','paymentReceipt'],
     });
     if (!appointment) {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
@@ -132,6 +132,33 @@ export class AppointmentsService {
     });
 
     return this.appointmentsRepository.save(updatedAppointment);
+  }
+
+  async completeAppointment(
+    id: number,
+    currentUser?: any,
+  ): Promise<Appointment> {
+    const appointment = await this.findOne(id);
+
+    // Validar que la cita esté pendiente
+    if (appointment.status !== 'pending') {
+      throw new BadRequestException(
+        `La cita debe estar en estado 'pending' para ser completada. Estado actual: ${appointment.status}`,
+      );
+    }
+
+    // Verificar que tenga comprobante de pago
+    if (!appointment.paymentReceipt) {
+      throw new BadRequestException(
+        'No se puede completar la cita sin comprobante de pago',
+      );
+    }
+
+    // Actualizar solo el estado
+    appointment.status = 'completed';
+    appointment.lastModified = new Date();
+
+    return this.appointmentsRepository.save(appointment);
   }
 
   async remove(id: number, currentUser?: any): Promise<void> {

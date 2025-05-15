@@ -193,4 +193,17 @@ export class DoctorsService {
 
     return relations.map((rel) => rel.secretary);
   }
+
+  async findDoctorByUserId(userId: number): Promise<Doctor> {
+  const doctor = await this.doctorsRepository.findOne({
+    where: { user: { id: userId }, deletedAt: IsNull() },
+    relations: ['user', 'clinic'],
+  });
+
+  if (!doctor) {
+    throw new NotFoundException(`Doctor with user ID ${userId} not found`);
+  }
+
+  return doctor;
+}
 }

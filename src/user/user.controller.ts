@@ -34,7 +34,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
+  @SetMetadata('roles', ['admin', 'doctor'])
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
