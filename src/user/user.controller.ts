@@ -23,13 +23,13 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async create(@Body() createUserDto: CreateUserDto,@Req() req): Promise<User> {
-    return this.usersService.create(createUserDto,req.user);
+  async create(@Body() createUserDto: CreateUserDto, @Req() req): Promise<User> {
+    return this.usersService.create(createUserDto, req.user);
   }
 
   @Get()
@@ -41,14 +41,14 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
+  @SetMetadata('roles', ['admin', 'patient', 'doctor'])
   async findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(+id);
   }
 
   @Put(':id')
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
+  @SetMetadata('roles', ['admin', 'patient', 'doctor'])
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -61,8 +61,8 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async remove(@Param('id') id: string,@Req()req): Promise<void> {
-    await this.usersService.remove(+id,req.user);
+  async remove(@Param('id') id: string, @Req() req): Promise<void> {
+    await this.usersService.remove(+id, req.user);
   }
 
   @Post(':id/restore')
