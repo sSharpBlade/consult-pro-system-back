@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Injectable,
   NotFoundException,
@@ -23,35 +24,51 @@ export class PaymentReceiptsService {
     createDto: CreatePaymentReceiptDto,
     currentUser?: any,
   ): Promise<PaymentReceipt> {
-    const appointment = await this.appointmentsRepository.findOne({
-      where: { id: createDto.appointmentId, deletedAt: IsNull() },
-    });
+    const queryRunner = this.paymentReceiptsRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (!appointment) {
-      throw new NotFoundException(
-        `Appointment with ID ${createDto.appointmentId} not found`,
-      );
+    try {
+      // Verificar y obtener la cita
+      const appointment = await queryRunner.manager.findOne(Appointment, {
+        where: { id: createDto.appointmentId, deletedAt: IsNull() },
+      });
+
+      if (!appointment) {
+        throw new NotFoundException(
+          `Cita con ID ${createDto.appointmentId} no encontrada`,
+        );
+      }
+
+      // Verificar que no exista ya un comprobante
+      const existingReceipt = await queryRunner.manager.findOne(PaymentReceipt, {
+        where: { appointment: { id: appointment.id }, deletedAt: IsNull() },
+      });
+
+      if (existingReceipt) {
+        throw new ConflictException(
+          `La cita ya tiene un comprobante de pago (ID: ${existingReceipt.id})`,
+        );
+      }
+
+      // Crear el comprobante
+      const paymentReceipt = this.paymentReceiptsRepository.create({
+        amount: createDto.amount,
+        method: createDto.method,
+        appointment,
+        createdBy: currentUser ? String(currentUser.id) : 'system',
+      });
+
+      const savedReceipt = await queryRunner.manager.save(paymentReceipt);
+      await queryRunner.commitTransaction();
+
+      return savedReceipt;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    // Verificar si ya existe un comprobante para esta cita
-    const existing = await this.paymentReceiptsRepository.findOne({
-      where: { appointment: { id: appointment.id }, deletedAt: IsNull() },
-    });
-
-    if (existing) {
-      throw new ConflictException(
-        `Appointment already has a payment receipt (ID: ${existing.id})`,
-      );
-    }
-
-    const paymentReceipt = this.paymentReceiptsRepository.create({
-      amount: createDto.amount,
-      method: createDto.method,
-      appointment,
-      createdBy: currentUser ? String(currentUser.id) : 'system',
-    });
-
-    return this.paymentReceiptsRepository.save(paymentReceipt);
   }
 
   async findAll(): Promise<PaymentReceipt[]> {

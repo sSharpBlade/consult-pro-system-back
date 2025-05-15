@@ -22,6 +22,16 @@ export class AppointmentsController {
     return this.appointmentsService.create(createAppointmentDto, req.user);
   }
 
+  @Post(':id/complete')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'admin'])
+  async completeAppointment(
+    @Param('id') id: string,
+    @Req() req,
+  ): Promise<Appointment> {
+    return this.appointmentsService.completeAppointment(+id, req.user);
+  }
+
   @Get()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['doctor', 'patient', 'secretary', 'admin'])
