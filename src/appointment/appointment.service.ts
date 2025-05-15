@@ -19,10 +19,9 @@ export class AppointmentsService {
     private doctorsRepository: Repository<Doctor>,
     @InjectRepository(Clinic)
     private clinicsRepository: Repository<Clinic>,
-  ) {}
+  ) { }
 
-  async create(createAppointmentDto: CreateAppointmentDto,currentUser?: any,): Promise<Appointment> 
-  {
+  async create(createAppointmentDto: CreateAppointmentDto, currentUser?: any,): Promise<Appointment> {
     const patient = await this.usersRepository.findOne({
       where: { id: createAppointmentDto.patientId, deletedAt: IsNull() },
     });
@@ -85,8 +84,7 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async update(id: number,updateAppointmentDto: UpdateAppointmentDto,currentUser?: any,): Promise<Appointment>
-   {
+  async update(id: number, updateAppointmentDto: UpdateAppointmentDto, currentUser?: any,): Promise<Appointment> {
     const appointment = await this.findOne(id);
 
     if (updateAppointmentDto.patientId) {
@@ -158,14 +156,14 @@ export class AppointmentsService {
     }
   }
 
-  async findByFilters(filters: {doctorId?: number;patientId?: number;clinicId?: number;date?: string;status?: string;}): Promise<Appointment[]> 
-  {
+  async findByFilters(filters: { doctorId?: number; patientId?: number; clinicId?: number; date?: string; status?: string; }): Promise<Appointment[]> {
     const query = this.appointmentsRepository.createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor')
+      .leftJoinAndSelect('doctor.user', 'user')
       .leftJoinAndSelect('appointment.clinic', 'clinic')
       .where('appointment.deletedAt IS NULL');
-    
+
     if (filters.doctorId) {
       query.andWhere('doctor.id = :doctorId', { doctorId: filters.doctorId });
     }
@@ -181,9 +179,9 @@ export class AppointmentsService {
     if (filters.status) {
       query.andWhere('appointment.status = :status', { status: filters.status });
     }
-    
+
     return query.getMany();
   }
 
-  
+
 }
