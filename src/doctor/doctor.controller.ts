@@ -103,4 +103,9 @@ export class DoctorsController {
   async listSecretaries(@Param('doctorId') doctorId: string) {
     return this.doctorsService.listSecretaries(+doctorId);
   }
+
+  @Get('by-user/:userId')
+async getDoctorByUserId(@Param('userId') userId: number): Promise<Doctor> {
+  return this.doctorsService.findDoctorByUserId(userId);
+}
 }

@@ -29,7 +29,7 @@ export class PaymentReceiptsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['doctor', 'patient'])
+  @SetMetadata('roles', ['doctor', 'patient', 'admin'])
   async create(
     @Body() createDto: CreatePaymentReceiptDto,
     @Req() req,

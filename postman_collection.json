@@ -1,0 +1,1096 @@
+{
+  "info": {
+    "name": "Consult-Pro System API",
+    "description": "API endpoints for Consult-Pro System including Appointments and Authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },  "item": [
+    {
+      "name": "Admin Dashboard",
+      "item": [
+        {
+          "name": "Admin Only",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/auth/admin",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "admin"
+              ]
+            },
+            "description": "Ruta protegida solo para administradores"
+          }
+        },
+        {
+          "name": "User Management",
+          "item": [
+            {
+              "name": "Get All Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/users",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
+                },
+                "description": "Obtener todos los usuarios del sistema (solo admin)"
+              }
+            },
+            {
+              "name": "Get User By ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/users/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1"
+                  ]
+                },
+                "description": "Obtener detalles de un usuario específico por su ID (solo admin)"
+              }
+            },
+            {
+              "name": "Create User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dni\": \"12345678\",\n  \"name\": \"Nombre Completo\",\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"contraseña123\",\n  \"role\": \"patient\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/users",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
+                },
+                "description": "Crear un nuevo usuario (solo admin)"
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Nuevo Nombre\",\n  \"email\": \"nuevo.email@ejemplo.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/users/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1"
+                  ]
+                },
+                "description": "Actualizar un usuario existente por su ID (solo admin)"
+              }
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/users/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1"
+                  ]
+                },
+                "description": "Eliminar un usuario por su ID (solo admin)"
+              }
+            },
+            {
+              "name": "Restore User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/users/1/restore",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "restore"
+                  ]
+                },
+                "description": "Restaurar un usuario previamente eliminado (solo admin)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Doctor Management",
+          "item": [
+            {
+              "name": "Create Doctor",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Dr. Nombre Apellido\",\n  \"dni\": \"87654321\",\n  \"email\": \"doctor@ejemplo.com\",\n  \"password\": \"contraseña123\",\n  \"specialization\": \"Cardiología\",\n  \"licenseNumber\": \"MED12345\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/doctors",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "doctors"
+                  ]
+                },
+                "description": "Crear un nuevo doctor (solo admin)"
+              }
+            },
+            {
+              "name": "Delete Doctor",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/doctors/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "1"
+                  ]
+                },
+                "description": "Eliminar un doctor (solo admin)"
+              }
+            },
+            {
+              "name": "Restore Doctor",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/doctors/1/restore",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "1",
+                    "restore"
+                  ]
+                },
+                "description": "Restaurar un doctor previamente eliminado (solo admin)"
+              }
+            },
+            {
+              "name": "Add Secretary to Doctor",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/doctors/1/secretaries/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "1",
+                    "secretaries",
+                    "1"
+                  ]
+                },
+                "description": "Asignar una secretaria a un doctor (solo admin)"
+              }
+            },
+            {
+              "name": "Remove Secretary from Doctor",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/doctors/1/secretaries/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "1",
+                    "secretaries",
+                    "1"
+                  ]
+                },
+                "description": "Eliminar la asignación de una secretaria a un doctor (solo admin)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clinic Management",
+          "item": [
+            {
+              "name": "Create Clinic",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Clínica Ejemplo\",\n  \"address\": \"Calle Principal 123\",\n  \"phone\": \"123-456-7890\",\n  \"email\": \"clinica@ejemplo.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/clinics",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "clinics"
+                  ]
+                },
+                "description": "Crear una nueva clínica (solo admin)"
+              }
+            },
+            {
+              "name": "Update Clinic",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Clínica Actualizada\",\n  \"address\": \"Nueva Dirección 456\",\n  \"phone\": \"987-654-3210\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/clinics/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "clinics",
+                    "1"
+                  ]
+                },
+                "description": "Actualizar una clínica existente (solo admin)"
+              }
+            },
+            {
+              "name": "Delete Clinic",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/clinics/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "clinics",
+                    "1"
+                  ]
+                },
+                "description": "Eliminar una clínica (solo admin)"
+              }
+            },
+            {
+              "name": "Restore Clinic",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/clinics/1/restore",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "clinics",
+                    "1",
+                    "restore"
+                  ]
+                },
+                "description": "Restaurar una clínica previamente eliminada (solo admin)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Plan Management",
+          "item": [
+            {
+              "name": "Create Plan",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Plan Básico\",\n  \"description\": \"Plan básico de consultas médicas\",\n  \"price\": 50.00,\n  \"features\": \"Consultas ilimitadas\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/plans",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "plans"
+                  ]
+                },
+                "description": "Crear un nuevo plan (solo admin)"
+              }
+            },
+            {
+              "name": "Update Plan",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Plan Premium Actualizado\",\n  \"description\": \"Plan premium con funcionalidades adicionales\",\n  \"price\": 100.00\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/plans/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "plans",
+                    "1"
+                  ]
+                },
+                "description": "Actualizar un plan existente (solo admin)"
+              }
+            },
+            {
+              "name": "Delete Plan",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/plans/1",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "plans",
+                    "1"
+                  ]
+                },
+                "description": "Eliminar un plan (solo admin)"
+              }
+            },
+            {
+              "name": "Restore Plan",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/plans/1/restore",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "plans",
+                    "1",
+                    "restore"
+                  ]
+                },
+                "description": "Restaurar un plan previamente eliminado (solo admin)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Appointment Management",
+          "item": [
+            {
+              "name": "Complete Appointment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/appointments/1/complete",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "1",
+                    "complete"
+                  ]
+                },
+                "description": "Marcar una cita como completada (admin, doctor)"
+              }
+            },
+            {
+              "name": "Restore Appointment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{url}}/appointments/1/restore",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "appointments",
+                    "1",
+                    "restore"
+                  ]
+                },
+                "description": "Restaurar una cita previamente eliminada (admin, doctor)"
+              }
+            },
+            {
+              "name": "Create Appointment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"clinicId\": 1,\n  \"appointmentDate\": \"2025-06-15\",\n  \"appointmentTime\": \"15:30\"\n}"
+                },
+                "url": {
+                  "raw": "{{url}}/appointments",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "appointments"
+                  ]
+                },
+                "description": "Crear una nueva cita médica (admin, doctor, patient)"
+              }
+            }
+          ]
+        }
+      ]
+    },{
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dni\": \"12345678\",\n  \"name\": \"Nombre Apellido\",\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"contraseña123\",\n  \"role\": \"patient\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/register",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registrar un nuevo usuario en el sistema"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"contraseña123\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/login",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Iniciar sesión y obtener token JWT"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/auth/profile",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Obtener información del perfil del usuario autenticado"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@ejemplo.com\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/forgot-password",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Solicitar restablecimiento de contraseña olvidada"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"token-recibido-por-email\",\n  \"password\": \"nueva-contraseña\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/auth/reset-password",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Establecer nueva contraseña usando el token recibido"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"clinicId\": 1,\n  \"appointmentDate\": \"2025-06-15\",\n  \"appointmentTime\": \"15:30\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/appointments",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            },
+            "description": "Crear una nueva cita médica"
+          }
+        },
+        {
+          "name": "Get All Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            },
+            "description": "Obtener todas las citas médicas"
+          }
+        },
+        {
+          "name": "Get Appointment By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/1",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "1"
+              ]
+            },
+            "description": "Obtener detalles de una cita específica por su ID"
+          }
+        },
+        {
+          "name": "Update Appointment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointmentDate\": \"2025-06-20\",\n  \"appointmentTime\": \"16:00\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{url}}/appointments/1",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "1"
+              ]
+            },
+            "description": "Actualizar una cita existente por su ID"
+          }
+        },
+        {
+          "name": "Delete Appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/1",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "1"
+              ]
+            },
+            "description": "Eliminar una cita por su ID"
+          }
+        },
+        {
+          "name": "Complete Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/1/complete",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "1",
+                "complete"
+              ]
+            },
+            "description": "Marcar una cita como completada"
+          }
+        },
+        {
+          "name": "Restore Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/1/restore",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "1",
+                "restore"
+              ]
+            },
+            "description": "Restaurar una cita previamente eliminada"
+          }
+        },
+        {
+          "name": "Filter Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/filter/by?doctorId=1&status=pending",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "filter",
+                "by"
+              ],
+              "query": [
+                {
+                  "key": "doctorId",
+                  "value": "1"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "patientId",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "clinicId",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "date",
+                  "value": "2025-06-15",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Filtrar citas por diferentes criterios"
+          }
+        },
+        {
+          "name": "Get Appointments By Doctor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{url}}/appointments/doctor/1",
+              "host": [
+                "{{url}}"
+              ],
+              "path": [
+                "appointments",
+                "doctor",
+                "1"
+              ]
+            },
+            "description": "Obtener todas las citas de un doctor específico"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.response.code === 200 && pm.response.json().token) {",
+          "    pm.environment.set('token', pm.response.json().token);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
