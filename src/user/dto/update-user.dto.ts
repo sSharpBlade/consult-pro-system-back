@@ -31,4 +31,17 @@ export class UpdateUserDto {
   @IsIn(['admin', 'patient', 'doctor', 'secretary'])
   @IsOptional()
   role?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(10)
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
+
+  @IsString()
+  @IsOptional()
+  image?: string;
 }
