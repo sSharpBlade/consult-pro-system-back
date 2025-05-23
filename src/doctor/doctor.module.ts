@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Doctor } from './entity/doctor.entity';
-import { SecretaryDoctor } from '../secretaryDoctor/entity/secretaryDoctor.entity';
+import { ClinicSecretary } from '../clinicSecretary/entity/clinicSecretary.entity';
 import { User } from '../user/entity/user.entity';
 import { Clinic } from '../clinic/entity/clinic.entity';
 import { Appointment } from '../appointment/entity/appointment.entity';
@@ -14,7 +14,7 @@ import { ClinicModule } from '../clinic/clinic.module';
   imports: [
     TypeOrmModule.forFeature([
       Doctor,
-      SecretaryDoctor,
+      ClinicSecretary,
       User,
       Clinic,
       Appointment,

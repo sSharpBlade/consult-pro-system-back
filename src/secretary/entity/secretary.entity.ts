@@ -1,13 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  ManyToMany,
-  OneToMany,
-} from 'typeorm';
-import { Doctor } from '../../doctor/entity/doctor.entity';
-import { SecretaryDoctor } from 'src/secretaryDoctor/entity/secretaryDoctor.entity';
+import {Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,ManyToMany,OneToMany,} from 'typeorm';
+import { Clinic } from '../../clinic/entity/clinic.entity';
+import { ClinicSecretary } from '../../clinicSecretary/entity/clinicSecretary.entity';
 
 @Entity('secretaries')
 export class Secretary {
@@ -49,12 +42,12 @@ export class Secretary {
   })
   deletedBy: string;
 
-  @ManyToMany(() => Doctor, (doctor) => doctor.secretaryDoctors)
-  doctors: Doctor[];
+  @ManyToMany(() => Clinic, (clinic) => clinic.secretaryClinics)
+  clinics: Clinic[];
 
   @OneToMany(
-    () => SecretaryDoctor,
-    (secretaryDoctor) => secretaryDoctor.secretary,
+    () => ClinicSecretary,
+    (clinicSecretary) => clinicSecretary.secretary,
   )
-  secretaryDoctors: SecretaryDoctor[];
+  clinicSecretaries: ClinicSecretary[];
 }

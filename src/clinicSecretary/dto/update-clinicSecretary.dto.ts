@@ -1,11 +1,11 @@
 import { IsNumber, IsOptional } from 'class-validator';
 
-export class UpdateSecretaryDoctorDto {
+export class UpdateClinicSecretaryDto {
   @IsNumber()
   @IsOptional()
   secretaryId?: number;
 
   @IsNumber()
   @IsOptional()
-  doctorId?: number;
+  clinicId?: number;
 }

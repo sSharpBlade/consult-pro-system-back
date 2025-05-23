@@ -1,14 +1,8 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  DeleteDateColumn,
-  OneToOne,
-  OneToMany,
-} from 'typeorm';
+import {Entity,PrimaryGeneratedColumn,Column,DeleteDateColumn,OneToOne,OneToMany,ManyToOne,JoinColumn} from 'typeorm';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
-import { SecretaryDoctor } from 'src/secretaryDoctor/entity/secretaryDoctor.entity';
+import { ClinicSecretary } from 'src/clinicSecretary/entity/clinicSecretary.entity';
+import { Role } from 'src/roles/entity/roles.entity';
 
 @Entity()
 export class User {
@@ -44,6 +38,10 @@ export class User {
   })
   tempPassword: string | null;
 
+  @ManyToOne(() => Role, (role) => role.users)
+  @JoinColumn({ name: 'role_id' })
+  userRole: Role;
+
   @Column({
     type: 'timestamp',
     nullable: true,
@@ -67,10 +65,10 @@ export class User {
   appointments: Appointment[];
 
   @OneToMany(
-    () => SecretaryDoctor,
-    (secretaryDoctor) => secretaryDoctor.secretary,
+    () => ClinicSecretary,
+    (clinicSecretaries) => clinicSecretaries.secretary,
   )
-  secretaryDoctors: SecretaryDoctor[];
+  clinicSecretaries: ClinicSecretary[];
 
   @Column({
     name: 'created_by',

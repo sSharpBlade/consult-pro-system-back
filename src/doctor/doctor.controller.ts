@@ -1,17 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
-  SetMetadata,
-  Req,
-} from '@nestjs/common';
+import {Controller,Get,Post,Body,Param,Put,Delete,HttpCode,HttpStatus,UseGuards,SetMetadata,Req,} from '@nestjs/common';
 import { DoctorsService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
@@ -75,34 +62,6 @@ export class DoctorsController {
     await this.doctorsService.restore(+id);
   }
 
-  @Post(':doctorId/secretaries/:secretaryId')
-  @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
-  @HttpCode(HttpStatus.CREATED)
-  async addSecretary(
-    @Param('doctorId') doctorId: string,
-    @Param('secretaryId') secretaryId: string,
-  ) {
-    return this.doctorsService.addSecretary(+doctorId, +secretaryId);
-  }
-
-  @Delete(':doctorId/secretaries/:secretaryId')
-  @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async removeSecretary(
-    @Param('doctorId') doctorId: string,
-    @Param('secretaryId') secretaryId: string,
-  ) {
-    await this.doctorsService.removeSecretary(+doctorId, +secretaryId);
-  }
-
-  @Get(':doctorId/secretaries')
-  @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin', 'doctor'])
-  async listSecretaries(@Param('doctorId') doctorId: string) {
-    return this.doctorsService.listSecretaries(+doctorId);
-  }
 
   @Get('by-user/:userId')
 async getDoctorByUserId(@Param('userId') userId: number): Promise<Doctor> {

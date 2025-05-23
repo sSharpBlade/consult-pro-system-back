@@ -1,15 +1,10 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  DeleteDateColumn,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import {Entity,PrimaryGeneratedColumn,Column,DeleteDateColumn,ManyToOne,OneToMany,ManyToMany} from 'typeorm';
 import { Plan } from '../../plan/entity/plan.entity';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
 import { ClinicPayment } from 'src/clinicPayment/entity/clinicPayment.entity';
+import { Secretary } from 'src/secretary/entity/secretary.entity';
+import { ClinicSecretary } from 'src/clinicSecretary/entity/clinicSecretary.entity';
 
 @Entity()
 export class Clinic {
@@ -77,4 +72,10 @@ export class Clinic {
     nullable: true,
   })
   deletedBy: string;
+  
+  @ManyToMany(() => Secretary, (secretary) => secretary.clinics)
+  secretaries: Secretary[];
+  
+  @OneToMany(() => ClinicSecretary, (clinicSecretary) => clinicSecretary.clinic)
+  secretaryClinics: ClinicSecretary[];
 }

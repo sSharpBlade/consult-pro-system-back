@@ -13,6 +13,7 @@ import { SecretaryModule } from './secretary/secretary.module';
 import { UserModule } from './user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AppService } from './app.service';
     PrescriptionModule,
     SecretaryModule,
     UserModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,12 +4,12 @@ import { SecretaryController } from './secretary.controller';
 import { SecretaryService } from './secretary.service';
 import { UserModule } from '../user/user.module';
 import { DoctorModule } from '../doctor/doctor.module';
-import { SecretaryDoctorModule } from 'src/secretaryDoctor/secretarydoctor.module';
+import { ClinicSecretaryModule } from 'src/clinicSecretary/clinicSecretary.module';
 import { Secretary } from './entity/secretary.entity';
 
 @Module({
   imports: [
-    SecretaryDoctorModule,
+    ClinicSecretaryModule,
     TypeOrmModule.forFeature([Secretary]),
     forwardRef(() => UserModule),
     forwardRef(() => DoctorModule),

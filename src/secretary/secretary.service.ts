@@ -22,8 +22,9 @@ export class SecretaryService {
       name: dto.name,
       phone: dto.phone,
       email: dto.email,
-      doctors,
+      isActive: true,
       createdBy: currentUser ? String(currentUser.id) : 'system',
+      // No doctors property, as Secretary entity does not have it
     });
     return this.secretaryRepo.save(secretary);
   }
@@ -46,11 +47,6 @@ export class SecretaryService {
 
   async update(id: number, dto: UpdateSecretaryDto, currentUser?: any) {
     const secretary = await this.findOne(id);
-
-    if (dto.doctorIds) {
-      secretary.doctors = await this.doctorRepo.findByIds(dto.doctorIds);
-      delete dto.doctorIds;
-    }
 
     // El lastModified se actualiza automáticamente por la configuración en la entidad
     Object.assign(secretary, dto);
