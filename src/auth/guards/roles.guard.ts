@@ -38,6 +38,6 @@ export class RolesGuard implements CanActivate {
     }
 
     // Verificar si el usuario tiene al menos uno de los roles requeridos
-    return requiredRoles.some((role) => user.role === role);
+    return requiredRoles.some((role) => user.userRole?.name === role);
   }
 }

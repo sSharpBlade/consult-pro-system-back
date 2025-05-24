@@ -23,12 +23,15 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
-  async create(@Body() createUserDto: CreateUserDto, @Req() req): Promise<User> {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @Req() req,
+  ): Promise<User> {
     return this.usersService.create(createUserDto, req.user);
   }
 
@@ -73,3 +76,5 @@ export class UsersController {
     await this.usersService.restore(+id);
   }
 }
+
+// Ahora los roles se validan contra la entidad Role en la base de datos

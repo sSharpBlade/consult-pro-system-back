@@ -7,7 +7,6 @@ import {
   IsIn,
   IsOptional,
 } from 'class-validator';
-import { User } from '../../user/entity/user.entity';
 
 export class RegisterDto {
   @IsString()
@@ -29,7 +28,7 @@ export class RegisterDto {
   password: string;
 
   @IsIn(['admin', 'patient', 'doctor', 'secretary'])
-  role: User['role'];
+  role: string;
 
   @IsString()
   @IsOptional()

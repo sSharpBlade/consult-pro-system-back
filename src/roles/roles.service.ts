@@ -5,35 +5,40 @@ import { Role } from './entity/roles.entity';
 
 @Injectable()
 export class RolesService {
-	constructor(
-		@InjectRepository(Role)
-		private readonly rolesRepository: Repository<Role>,
-	) {}
+  constructor(
+    @InjectRepository(Role)
+    private readonly rolesRepository: Repository<Role>,
+  ) {}
 
-	async findAll(): Promise<Role[]> {
-		return this.rolesRepository.find();
-	}
+  async findAll(): Promise<Role[]> {
+    return this.rolesRepository.find();
+  }
 
-	async findOne(id: number): Promise<Role | undefined> {
-		const role = await this.rolesRepository.findOne({ where: { id } });
-		return role === null ? undefined : role;
-	}
+  async findOne(id: number): Promise<Role | undefined> {
+    const role = await this.rolesRepository.findOne({ where: { id } });
+    return role === null ? undefined : role;
+  }
 
-	async create(roleData: Partial<Role>): Promise<Role> {
-		const role = this.rolesRepository.create(roleData);
-		return this.rolesRepository.save(role);
-	}
+  async findOneByName(name: string): Promise<Role | undefined> {
+    const role = await this.rolesRepository.findOne({ where: { name } });
+    return role === null ? undefined : role;
+  }
 
-	async update(id: number, updateData: Partial<Role>): Promise<Role> {
-		await this.rolesRepository.update(id, updateData);
-		const updatedRole = await this.findOne(id);
-		if (!updatedRole) {
-			throw new Error(`Role with id ${id} not found`);
-		}
-		return updatedRole;
-	}
+  async create(roleData: Partial<Role>): Promise<Role> {
+    const role = this.rolesRepository.create(roleData);
+    return this.rolesRepository.save(role);
+  }
 
-	async remove(id: number): Promise<void> {
-		await this.rolesRepository.delete(id);
-	}
+  async update(id: number, updateData: Partial<Role>): Promise<Role> {
+    await this.rolesRepository.update(id, updateData);
+    const updatedRole = await this.findOne(id);
+    if (!updatedRole) {
+      throw new Error(`Role with id ${id} not found`);
+    }
+    return updatedRole;
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.rolesRepository.delete(id);
+  }
 }

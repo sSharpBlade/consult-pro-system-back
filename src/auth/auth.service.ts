@@ -18,6 +18,7 @@ import { JwtPayload } from './types';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { MailService } from './mail.service';
+import { RolesService } from '../roles/roles.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly rolesService: RolesService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -38,9 +40,13 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    // Buscar el rol 'patient' en la base de datos
+    const roleEntity = await this.rolesService.findOneByName('patient');
+    if (!roleEntity) throw new NotFoundException('Rol patient no encontrado');
     const user = this.userRepository.create({
       ...registerDto,
       password: hashedPassword,
+      userRole: roleEntity,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -53,11 +59,11 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email, deletedAt: IsNull() },
+      relations: ['userRole'],
       select: [
         'id',
         'email',
         'password',
-        'role',
         'dni',
         'name',
         'createdAt',
@@ -124,7 +130,7 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      role: user.userRole?.name,
       dni: user.dni,
       name: user.name,
     };

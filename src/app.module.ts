@@ -14,6 +14,7 @@ import { UserModule } from './user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RolesModule } from './roles/roles.module';
+import { ClinicSecretaryModule } from './clinicSecretary/clinicSecretary.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { RolesModule } from './roles/roles.module';
     SecretaryModule,
     UserModule,
     RolesModule,
+    ClinicSecretaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

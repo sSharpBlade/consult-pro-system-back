@@ -1,4 +1,13 @@
-import {Entity,PrimaryGeneratedColumn,Column,DeleteDateColumn,OneToOne,OneToMany,ManyToOne,JoinColumn} from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  DeleteDateColumn,
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
 import { ClinicSecretary } from 'src/clinicSecretary/entity/clinicSecretary.entity';
@@ -38,7 +47,7 @@ export class User {
   })
   tempPassword: string | null;
 
-  @ManyToOne(() => Role, (role) => role.users)
+  @ManyToOne(() => Role, (role) => role.users, { eager: true, nullable: false })
   @JoinColumn({ name: 'role_id' })
   userRole: Role;
 
@@ -48,9 +57,6 @@ export class User {
     name: 'temp_password_expires',
   })
   tempPasswordExpires: Date | null;
-
-  @Column({ length: 20, default: 'patient' })
-  role: 'admin' | 'patient' | 'doctor' | 'secretary';
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

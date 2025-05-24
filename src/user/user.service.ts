@@ -5,21 +5,35 @@ import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { RolesService } from '../roles/roles.service';
+
+function getUserId(user: any): string | undefined {
+  if (user && typeof user === 'object' && user?.id) {
+    return String(user.id);
+  }
+  return undefined;
+}
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private rolesService: RolesService,
   ) {}
 
   async create(createUserDto: CreateUserDto, currentUser?: any): Promise<User> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const roleEntity = await this.rolesService.findOneByName(
+      createUserDto.role,
+    );
+    if (!roleEntity) throw new NotFoundException('Rol no encontrado');
+    const createdBy = getUserId(currentUser) || 'system';
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
-      role: createUserDto.role as 'doctor' | 'admin' | 'patient' | 'secretary',
-      createdBy: currentUser ? String(currentUser.id) : 'system',
+      userRole: roleEntity,
+      createdBy,
     });
     return this.usersRepository.save(user);
   }
@@ -44,25 +58,36 @@ export class UsersService {
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto, currentUser?: any): Promise<User> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    currentUser?: any,
+  ): Promise<User> {
     const user = await this.findOne(id);
-
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-
+    let roleEntity = user.userRole;
+    if (updateUserDto.role) {
+      const foundRole = await this.rolesService.findOneByName(
+        updateUserDto.role,
+      );
+      if (!foundRole) throw new NotFoundException('Rol no encontrado');
+      roleEntity = foundRole;
+    }
     const updatedUser = this.usersRepository.merge(user, {
       ...updateUserDto,
-      role: updateUserDto.role as 'doctor' | 'admin' | 'patient' | 'secretary',
+      userRole: roleEntity,
     });
     return this.usersRepository.save(updatedUser);
   }
 
   async remove(id: number, currentUser?: any): Promise<void> {
     const user = await this.findOne(id);
+    const deletedBy = getUserId(currentUser) || 'system';
     if ('deletedBy' in user) {
       await this.usersRepository.update(id, {
-        deletedBy: currentUser ? String(currentUser.id) : 'system',
+        deletedBy,
       });
     }
     const result = await this.usersRepository.softDelete(id);
