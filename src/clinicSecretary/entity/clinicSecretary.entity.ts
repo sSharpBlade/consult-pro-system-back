@@ -1,5 +1,12 @@
-import {Entity,PrimaryGeneratedColumn,Column,ManyToOne,JoinColumn,CreateDateColumn} from 'typeorm';
-import { Secretary } from '../../secretary/entity/secretary.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
+import { User } from '../../user/entity/user.entity';
 import { Clinic } from '../../clinic/entity/clinic.entity';
 
 @Entity('clinic_secretaries')
@@ -19,9 +26,9 @@ export class ClinicSecretary {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Secretary, (secretary) => secretary.clinicSecretaries)
+  @ManyToOne(() => User, (user) => user.clinicSecretaries)
   @JoinColumn({ name: 'secretaryId' })
-  secretary: Secretary;
+  secretary: User;
 
   @ManyToOne(() => Clinic, (clinic) => clinic.secretaryClinics)
   @JoinColumn({ name: 'clinicId' })
