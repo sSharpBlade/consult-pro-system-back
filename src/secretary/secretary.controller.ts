@@ -37,7 +37,8 @@ export class SecretaryController {
   @SetMetadata('roles', ['admin', 'doctor'])
   @ApiOperation({
     summary: 'Crear una secretaria',
-    description: 'Crea una nueva secretaria. Solo administradores y doctores.',
+    description:
+      'Crea una nueva secretaria (usuario con rol secretaria). Solo administradores y doctores.',
   })
   @ApiBody({
     schema: {
@@ -45,12 +46,13 @@ export class SecretaryController {
         name: 'María López',
         phone: '987654321',
         email: 'secretaria@ejemplo.com',
-        doctorIds: [1, 2],
+        password: 'secreta123',
       },
     },
   })
   @ApiResponse({ status: 201, description: 'Secretaria creada correctamente.' })
-  create(@Body() dto: CreateSecretaryDto, @Req() req) {
+  create(@Body() dto: any, @Req() req) {
+    // Se recomienda crear un DTO específico para crear usuario secretaria
     return this.secretaryService.create(dto, req.user);
   }
 
@@ -60,7 +62,7 @@ export class SecretaryController {
   @ApiOperation({
     summary: 'Listar secretarias',
     description:
-      'Devuelve todas las secretarias del sistema. Solo administradores, secretarias y doctores.',
+      'Devuelve todos los usuarios con rol secretaria. Solo administradores, secretarias y doctores.',
   })
   @ApiResponse({ status: 200, description: 'Lista de secretarias.' })
   findAll() {
@@ -72,7 +74,8 @@ export class SecretaryController {
   @SetMetadata('roles', ['admin', 'secretary', 'doctor'])
   @ApiOperation({
     summary: 'Obtener una secretaria',
-    description: 'Devuelve los datos de una secretaria específica.',
+    description:
+      'Devuelve los datos de una secretaria específica (usuario con rol secretaria).',
   })
   @ApiParam({ name: 'id', example: 1, description: 'ID de la secretaria' })
   @ApiResponse({ status: 200, description: 'Secretaria encontrada.' })
@@ -86,7 +89,7 @@ export class SecretaryController {
   @ApiOperation({
     summary: 'Actualizar una secretaria',
     description:
-      'Actualiza los datos de una secretaria. Solo administradores y doctores.',
+      'Actualiza los datos de una secretaria (usuario con rol secretaria). Solo administradores y doctores.',
   })
   @ApiParam({ name: 'id', example: 1, description: 'ID de la secretaria' })
   @ApiBody({
@@ -95,13 +98,12 @@ export class SecretaryController {
         name: 'María López Actualizada',
         phone: '912345678',
         email: 'nueva_secretaria@ejemplo.com',
-        doctorIds: [2, 3],
       },
     },
   })
   @ApiResponse({ status: 200, description: 'Secretaria actualizada.' })
-  update(@Param('id') id: string, @Body() dto: UpdateSecretaryDto, @Req() req) {
-    return this.secretaryService.update(+id, dto, req.user);
+  update(@Param('id') id: string, @Body() dto: any) {
+    return this.secretaryService.update(+id, dto);
   }
 
   @Delete(':id')
@@ -110,7 +112,7 @@ export class SecretaryController {
   @ApiOperation({
     summary: 'Eliminar una secretaria',
     description:
-      'Elimina una secretaria (soft delete). Solo administradores y doctores.',
+      'Elimina una secretaria (soft delete, usuario con rol secretaria). Solo administradores y doctores.',
   })
   @ApiParam({ name: 'id', example: 1, description: 'ID de la secretaria' })
   @ApiResponse({ status: 200, description: 'Secretaria eliminada.' })

@@ -1,62 +1,109 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Secretary } from './entity/secretary.entity';
-import { CreateSecretaryDto } from './dto/create-secretary.dto';
-import { UpdateSecretaryDto } from './dto/update-secretary.dto';
-import { Doctor } from '../doctor/entity/doctor.entity';
+import { Repository, IsNull } from 'typeorm';
+import { User } from '../user/entity/user.entity';
+import { Clinic } from '../clinic/entity/clinic.entity';
+import { ClinicSecretary } from '../clinicSecretary/entity/clinicSecretary.entity';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { ClinicSecretaryDto } from '../clinicSecretary/dto/create-clinicSecretary.entity';
+import { RolesService } from '../roles/roles.service';
+
+function getUserId(user: any): string | undefined {
+  if (
+    user &&
+    typeof user === 'object' &&
+    Object.prototype.hasOwnProperty.call(user, 'id')
+  ) {
+    return String(user['id']);
+  }
+  return undefined;
+}
 
 @Injectable()
 export class SecretaryService {
   constructor(
-    @InjectRepository(Secretary)
-    private secretaryRepo: Repository<Secretary>,
-
-    @InjectRepository(Doctor)
-    private doctorRepo: Repository<Doctor>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+    @InjectRepository(Clinic)
+    private clinicRepo: Repository<Clinic>,
+    @InjectRepository(ClinicSecretary)
+    private clinicSecretaryRepo: Repository<ClinicSecretary>,
+    private rolesService: RolesService,
   ) {}
 
-  async create(dto: CreateSecretaryDto, currentUser?: any) {
-    const doctors = await this.doctorRepo.findByIds(dto.doctorIds);
-    const secretary = this.secretaryRepo.create({
-      name: dto.name,
-      phone: dto.phone,
-      email: dto.email,
-      isActive: true,
-      createdBy: currentUser ? String(currentUser.id) : 'system',
-      // No doctors property, as Secretary entity does not have it
+  async create(dto: CreateUserDto, currentUser?: any) {
+    // Forzar rol secretary
+    const role = await this.rolesService.findOneByName('secretary');
+    if (!role) throw new NotFoundException('Rol secretaria no encontrado');
+    const createdBy = getUserId(currentUser) || 'system';
+    const user = this.userRepo.create({
+      ...dto,
+      userRole: role,
+      createdBy,
     });
-    return this.secretaryRepo.save(secretary);
+    return this.userRepo.save(user);
   }
 
   async findAll() {
-    return this.secretaryRepo.find({
-      where: { isActive: true },
-      relations: ['doctors'],
+    // Solo usuarios con rol secretaria y no eliminados
+    return this.userRepo.find({
+      where: { userRole: { name: 'secretary' }, deletedAt: IsNull() },
+      relations: ['userRole'],
     });
   }
 
   async findOne(id: number) {
-    const secretary = await this.secretaryRepo.findOne({
-      where: { id, isActive: true },
-      relations: ['doctors'],
+    const user = await this.userRepo.findOne({
+      where: { id, deletedAt: IsNull() },
+      relations: ['userRole'],
     });
-    if (!secretary) throw new NotFoundException('Secretaria no encontrada');
-    return secretary;
+    if (!user || user.userRole?.name !== 'secretary')
+      throw new NotFoundException('Secretaria no encontrada');
+    return user;
   }
 
-  async update(id: number, dto: UpdateSecretaryDto, currentUser?: any) {
-    const secretary = await this.findOne(id);
-
-    // El lastModified se actualiza automáticamente por la configuración en la entidad
-    Object.assign(secretary, dto);
-    return this.secretaryRepo.save(secretary);
+  async update(id: number, dto: UpdateUserDto) {
+    const user = await this.findOne(id);
+    Object.assign(user, dto);
+    return this.userRepo.save(user);
   }
 
   async remove(id: number, currentUser?: any) {
-    const secretary = await this.findOne(id);
-    secretary.isActive = false;
-    secretary.deletedBy = currentUser ? String(currentUser.id) : 'system';
-    return this.secretaryRepo.save(secretary);
+    const user = await this.findOne(id);
+    user.deletedAt = new Date();
+    user.deletedBy = getUserId(currentUser) || 'system';
+    return this.userRepo.save(user);
+  }
+
+  // Asignar secretaria a clínica
+  async assignToClinic(dto: ClinicSecretaryDto) {
+    await this.findOne(dto.secretaryId); // Solo para validar existencia y rol
+    const clinic = await this.clinicRepo.findOne({
+      where: { id: dto.clinicId, active: true },
+    });
+    if (!clinic) throw new NotFoundException('Clínica no encontrada');
+    const exists = await this.clinicSecretaryRepo.findOne({
+      where: {
+        secretaryId: dto.secretaryId,
+        clinicId: dto.clinicId,
+        isActive: true,
+      },
+    });
+    if (exists) return exists;
+    const relation = this.clinicSecretaryRepo.create({
+      secretaryId: dto.secretaryId,
+      clinicId: dto.clinicId,
+    });
+    return this.clinicSecretaryRepo.save(relation);
+  }
+
+  // Listar clínicas de una secretaria
+  async getClinics(secretaryId: number) {
+    const relations = await this.clinicSecretaryRepo.find({
+      where: { secretaryId, isActive: true },
+      relations: ['clinic'],
+    });
+    return relations.map((r) => r.clinic);
   }
 }

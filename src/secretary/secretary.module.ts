@@ -6,6 +6,7 @@ import { UserModule } from '../user/user.module';
 import { DoctorModule } from '../doctor/doctor.module';
 import { ClinicSecretaryModule } from 'src/clinicSecretary/clinicSecretary.module';
 import { Secretary } from './entity/secretary.entity';
+import { RolesModule } from '../roles/roles.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Secretary } from './entity/secretary.entity';
     TypeOrmModule.forFeature([Secretary]),
     forwardRef(() => UserModule),
     forwardRef(() => DoctorModule),
+    RolesModule,
   ],
   controllers: [SecretaryController],
   providers: [SecretaryService],
