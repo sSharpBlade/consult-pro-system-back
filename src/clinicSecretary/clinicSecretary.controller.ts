@@ -6,11 +6,18 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ClinicSecretaryService } from './clinicSecretary.service';
 import { ClinicSecretaryDto } from './dto/create-clinicSecretary.entity';
 
 @Controller('clinic-secretaries')
+@ApiBearerAuth('JWT-auth')
 export class ClinicSecretaryController {
   constructor(
     private readonly clinicSecretaryService: ClinicSecretaryService,

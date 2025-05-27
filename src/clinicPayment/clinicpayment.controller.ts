@@ -19,9 +19,16 @@ import { UpdateClinicPaymentDto } from './dto/update-clinicPayment.dto';
 import { ClinicPayment } from './entity/clinicPayment.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @Controller('clinic-payments')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 export class ClinicPaymentsController {
   constructor(private readonly clinicPaymentsService: ClinicPaymentsService) {}

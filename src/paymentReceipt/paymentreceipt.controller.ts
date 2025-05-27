@@ -19,9 +19,16 @@ import { UpdatePaymentReceiptDto } from './dto/update-paymentReceipt.dto';
 import { PaymentReceipt } from './entity/paymentReceipt.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @Controller('payment-receipts')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 export class PaymentReceiptsController {
   constructor(

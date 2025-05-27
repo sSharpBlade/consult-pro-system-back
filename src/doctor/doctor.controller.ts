@@ -18,9 +18,16 @@ import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { Doctor } from './entity/doctor.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @Controller('doctors')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 export class DoctorsController {
   constructor(private readonly doctorsService: DoctorsService) {}

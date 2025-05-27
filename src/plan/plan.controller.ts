@@ -18,9 +18,16 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { Plan } from './entity/plan.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @Controller('plans')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}

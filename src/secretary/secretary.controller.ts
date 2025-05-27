@@ -22,10 +22,12 @@ import {
   ApiBody,
   ApiParam,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 @ApiTags('Secretarias')
 @Controller('secretaries')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 export class SecretaryController {
   constructor(private readonly secretaryService: SecretaryService) {}
