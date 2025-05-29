@@ -23,7 +23,7 @@ export class CreateUserDto {
 
   @IsString()
   @MinLength(8)
-  password: string;
+  password: string = 'password';
 
   @IsIn(['admin', 'patient', 'doctor', 'secretary'])
   role: string;

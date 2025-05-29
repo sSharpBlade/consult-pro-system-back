@@ -36,7 +36,7 @@ export class UsersController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin'])
+  @SetMetadata('roles', ['doctor', 'admin'])
   @ApiOperation({
     summary: 'Crear un nuevo usuario',
     description:
@@ -76,7 +76,7 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(RolesGuard)
-  @SetMetadata('roles', ['admin', 'patient', 'doctor'])
+  @SetMetadata('roles', ['admin', 'patient', 'doctor', 'secretary'])
   @ApiOperation({
     summary: 'Obtener un usuario',
     description: 'Devuelve los datos de un usuario específico.',

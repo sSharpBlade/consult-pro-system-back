@@ -23,7 +23,12 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto, currentUser?: any): Promise<User> {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    // Si no viene password o es vacío, asignar uno por defecto
+    const plainPassword =
+      createUserDto.password && createUserDto.password.trim() !== ''
+        ? createUserDto.password
+        : 'password123';
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
     const roleEntity = await this.rolesService.findOneByName(
       createUserDto.role,
     );
