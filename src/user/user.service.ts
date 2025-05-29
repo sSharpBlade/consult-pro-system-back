@@ -58,6 +58,16 @@ export class UsersService {
     });
   }
 
+  async findByDni(dni: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { dni, deletedAt: IsNull() },
+    });
+    if (!user) {
+      throw new NotFoundException(`Usuario con DNI ${dni} no encontrado`);
+    }
+    return user;
+  }
+
   async update(
     id: number,
     updateUserDto: UpdateUserDto,

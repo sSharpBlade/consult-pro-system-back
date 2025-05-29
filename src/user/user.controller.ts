@@ -161,4 +161,22 @@ export class UsersController {
   ): Promise<User[]> {
     return this.usersService.findPatientsByDoctor(+doctorUserId);
   }
+
+  @Get('dni/:dni')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin', 'doctor', 'secretary'])
+  @ApiOperation({
+    summary: 'Buscar usuario por cédula',
+    description: 'Devuelve los datos de un usuario según su cédula (dni).',
+  })
+  @ApiParam({
+    name: 'dni',
+    example: '72845163',
+    description: 'Cédula del usuario',
+  })
+  @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+  async findByDni(@Param('dni') dni: string): Promise<User> {
+    return this.usersService.findByDni(dni);
+  }
 }
