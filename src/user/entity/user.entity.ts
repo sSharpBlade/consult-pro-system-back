@@ -36,7 +36,7 @@ export class User {
   @Column({ length: 255, nullable: true })
   image: string;
 
-  @Column({ length: 255 })
+  @Column({ length: 255, default: 'consultprosystem' })
   password: string;
 
   @Column({
