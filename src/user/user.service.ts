@@ -102,4 +102,34 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
   }
+
+  async findPatientsByDoctor(doctorUserId: number): Promise<User[]> {
+    // Pacientes creados por el doctor
+    const createdPatients = await this.usersRepository.find({
+      where: {
+        createdBy: String(doctorUserId),
+        userRole: { name: 'patient' },
+        deletedAt: IsNull(),
+      },
+    });
+
+    // Pacientes con cita con el doctor
+    const patientsWithAppointments = await this.usersRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.appointments', 'appointment')
+      .innerJoin('appointment.doctor', 'doctor')
+      .innerJoin('doctor.user', 'doctorUser')
+      .innerJoin('user.userRole', 'role')
+      .where('doctorUser.id = :doctorUserId', { doctorUserId })
+      .andWhere('user.deletedAt IS NULL')
+      .andWhere('role.name = :role', { role: 'patient' })
+      .getMany();
+
+    // Unir y eliminar duplicados por id
+    const allPatients = [...createdPatients, ...patientsWithAppointments];
+    const uniquePatients = Array.from(
+      new Map(allPatients.map((u) => [u.id, u])).values(),
+    );
+    return uniquePatients;
+  }
 }

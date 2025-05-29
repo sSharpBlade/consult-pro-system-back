@@ -141,4 +141,24 @@ export class UsersController {
   async restore(@Param('id') id: string): Promise<void> {
     await this.usersService.restore(+id);
   }
+
+  @Get('patients/by-doctor/:doctorUserId')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['doctor', 'admin'])
+  @ApiOperation({
+    summary: 'Obtener todos los pacientes de un doctor',
+    description:
+      'Devuelve todos los pacientes que fueron creados por el doctor o que han tenido al menos una cita con él. Sin duplicados.',
+  })
+  @ApiParam({
+    name: 'doctorUserId',
+    example: 2,
+    description: 'ID de usuario del doctor',
+  })
+  @ApiResponse({ status: 200, description: 'Lista de pacientes del doctor.' })
+  async findPatientsByDoctor(
+    @Param('doctorUserId') doctorUserId: string,
+  ): Promise<User[]> {
+    return this.usersService.findPatientsByDoctor(+doctorUserId);
+  }
 }
