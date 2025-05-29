@@ -68,16 +68,33 @@ export class ClinicPaymentsController {
   @UseGuards(RolesGuard)
   @SetMetadata('roles', ['admin'])
   @ApiOperation({
-    summary: 'Listar pagos de clínica',
-    description: 'Devuelve todos los pagos de clínica. Solo administradores.',
+    summary: 'Listar pagos de clínica (por clínica específica)',
+    description:
+      'Devuelve los pagos de una clínica específica si se pasa el parámetro clinicId. Solo administradores.',
   })
-  @ApiResponse({ status: 200, description: 'Lista de pagos de clínica.' })
-  async findAll(
+  @ApiResponse({ status: 200, description: 'Lista de pagos de una clínica.' })
+  async findByClinicId(
     @Query('clinicId') clinicId?: string,
   ): Promise<ClinicPayment[]> {
     if (clinicId) {
       return this.clinicPaymentsService.findByClinic(+clinicId);
     }
+    return this.clinicPaymentsService.findAll();
+  }
+
+  @Get('all')
+  @UseGuards(RolesGuard)
+  @SetMetadata('roles', ['admin'])
+  @ApiOperation({
+    summary: 'Listar todos los pagos de todas las clínicas',
+    description:
+      'Devuelve todos los pagos de todas las clínicas. Solo administradores.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de todos los pagos de todas las clínicas.',
+  })
+  async findAllClinicsPayments(): Promise<ClinicPayment[]> {
     return this.clinicPaymentsService.findAll();
   }
 
