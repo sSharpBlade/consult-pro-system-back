@@ -1,4 +1,12 @@
-import {Entity,PrimaryGeneratedColumn,Column,DeleteDateColumn,ManyToOne,OneToMany,ManyToMany} from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  DeleteDateColumn,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 import { Plan } from '../../plan/entity/plan.entity';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
@@ -29,7 +37,7 @@ export class Clinic {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({ length: 20 })
+  @Column('text')
   openingDays: string;
 
   @Column({ type: 'time' })
@@ -72,10 +80,10 @@ export class Clinic {
     nullable: true,
   })
   deletedBy: string;
-  
+
   @ManyToMany(() => Secretary, (secretary) => secretary.clinics)
   secretaries: Secretary[];
-  
+
   @OneToMany(() => ClinicSecretary, (clinicSecretary) => clinicSecretary.clinic)
   secretaryClinics: ClinicSecretary[];
 }
