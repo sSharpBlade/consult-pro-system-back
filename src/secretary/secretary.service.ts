@@ -46,10 +46,9 @@ export class SecretaryService {
   }
 
   async findAll() {
-    // Solo usuarios con rol secretaria y no eliminados
     return this.userRepo.find({
       where: { userRole: { name: 'secretary' }, deletedAt: IsNull() },
-      relations: ['userRole'],
+      relations: ['userRole', 'clinicSecretaries', 'clinicSecretaries.clinic'],
     });
   }
 
