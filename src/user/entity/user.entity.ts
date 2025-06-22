@@ -12,6 +12,7 @@ import { Doctor } from 'src/doctor/entity/doctor.entity';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
 import { ClinicSecretary } from 'src/clinicSecretary/entity/clinicSecretary.entity';
 import { Role } from 'src/roles/entity/roles.entity';
+import { UserToken } from 'src/push-notifications/entity/userToken.entity';
 
 @Entity()
 export class User {
@@ -75,6 +76,9 @@ export class User {
     (clinicSecretaries) => clinicSecretaries.secretary,
   )
   clinicSecretaries: ClinicSecretary[];
+
+  @OneToMany(() => UserToken, (userToken) => userToken.user)
+  user_tokens: UserToken[];
 
   @Column({
     name: 'created_by',
