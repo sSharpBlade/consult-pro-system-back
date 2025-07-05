@@ -20,13 +20,13 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 10, unique: true, transformer: encryptionTransformer })
+  @Column({ length: 10, unique: true })
   dni: string;
 
   @Column({ length: 100, nullable: true, transformer: encryptionTransformer })
   name: string;
 
-  @Column({ length: 100, unique: true, transformer: encryptionTransformer })
+  @Column({ length: 100, unique: true })
   email: string;
 
   @Column({ length: 10, nullable: true, transformer: encryptionTransformer })
