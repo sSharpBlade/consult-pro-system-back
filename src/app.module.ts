@@ -19,6 +19,7 @@ import { ReportsModule } from './reports/reports.module';
 import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
     ScheduleModule.forRoot(),
 
+    CommonModule,
     AuthModule,
     AppointmentModule,
     ClinicModule,
@@ -50,9 +52,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     ClinicSecretaryModule,
     ReportsModule,
     PushNotificationsModule,
-    ReminderModule
+    ReminderModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,19 +1,27 @@
-import {Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,ManyToMany,OneToMany,} from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 import { Clinic } from '../../clinic/entity/clinic.entity';
 import { ClinicSecretary } from '../../clinicSecretary/entity/clinicSecretary.entity';
+import { encryptionTransformer } from 'src/common/transformers/encryption.transformer';
 
 @Entity('secretaries')
 export class Secretary {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ transformer: encryptionTransformer })
   name: string;
 
-  @Column()
+  @Column({ transformer: encryptionTransformer })
   phone: string;
 
-  @Column()
+  @Column({ transformer: encryptionTransformer })
   email: string;
 
   @Column({ default: true })
@@ -24,7 +32,7 @@ export class Secretary {
 
   @Column({
     name: 'created_by',
-    nullable: true  
+    nullable: true,
   })
   createdBy: string;
 
@@ -32,13 +40,13 @@ export class Secretary {
     name: 'last_modified',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   lastModified: Date;
 
   @Column({
     name: 'deleted_by',
-    nullable: true  
+    nullable: true,
   })
   deletedBy: string;
 

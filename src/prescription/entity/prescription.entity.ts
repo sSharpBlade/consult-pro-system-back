@@ -7,13 +7,14 @@ import {
 } from 'typeorm';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
 import { Doctor } from 'src/doctor/entity/doctor.entity';
+import { encryptionTransformer } from 'src/common/transformers/encryption.transformer';
 
 @Entity()
 export class Prescription {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('text')
+  @Column('text', { transformer: encryptionTransformer })
   document: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -21,7 +22,7 @@ export class Prescription {
 
   @Column({
     name: 'created_by',
-    nullable: true  
+    nullable: true,
   })
   createdBy: string;
 
@@ -29,7 +30,7 @@ export class Prescription {
     name: 'last_modified',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP'
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   lastModified: Date;
 
@@ -38,7 +39,7 @@ export class Prescription {
 
   @Column({
     name: 'deleted_by',
-    nullable: true  
+    nullable: true,
   })
   deletedBy: string;
 

@@ -6,19 +6,25 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Appointment } from 'src/appointment/entity/appointment.entity';
+import { encryptionTransformer } from 'src/common/transformers/encryption.transformer';
 
 @Entity()
 export class PaymentReceipt {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    transformer: encryptionTransformer,
+  })
   amount: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   paymentDate: Date;
 
-  @Column({ length: 50 })
+  @Column({ length: 50, transformer: encryptionTransformer })
   method: string;
 
   @DeleteDateColumn({ type: 'timestamp' })

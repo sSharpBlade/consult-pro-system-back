@@ -13,25 +13,26 @@ import { Appointment } from 'src/appointment/entity/appointment.entity';
 import { ClinicSecretary } from 'src/clinicSecretary/entity/clinicSecretary.entity';
 import { Role } from 'src/roles/entity/roles.entity';
 import { UserToken } from 'src/push-notifications/entity/userToken.entity';
+import { encryptionTransformer } from 'src/common/transformers/encryption.transformer';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 10, unique: true })
+  @Column({ length: 10, unique: true, transformer: encryptionTransformer })
   dni: string;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, transformer: encryptionTransformer })
   name: string;
 
-  @Column({ length: 100, unique: true })
+  @Column({ length: 100, unique: true, transformer: encryptionTransformer })
   email: string;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ length: 10, nullable: true, transformer: encryptionTransformer })
   phone: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, transformer: encryptionTransformer })
   address: string;
 
   @Column({ length: 255, nullable: true })
