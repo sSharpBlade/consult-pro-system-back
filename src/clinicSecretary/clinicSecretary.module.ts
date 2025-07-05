@@ -4,10 +4,13 @@ import { ClinicSecretary } from './entity/clinicSecretary.entity';
 import { ClinicSecretaryService } from './clinicSecretary.service';
 import { User } from '../user/entity/user.entity';
 import { Clinic } from '../clinic/entity/clinic.entity';
+import { Appointment } from '../appointment/entity/appointment.entity';
 import { ClinicSecretaryController } from './clinicSecretary.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClinicSecretary, User, Clinic])],
+  imports: [
+    TypeOrmModule.forFeature([ClinicSecretary, User, Clinic, Appointment]),
+  ],
   providers: [ClinicSecretaryService],
   controllers: [ClinicSecretaryController],
   exports: [TypeOrmModule, ClinicSecretaryService],

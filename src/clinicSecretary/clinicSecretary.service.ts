@@ -5,6 +5,7 @@ import { ClinicSecretary } from './entity/clinicSecretary.entity';
 import { ClinicSecretaryDto } from './dto/create-clinicSecretary.entity';
 import { Clinic } from '../clinic/entity/clinic.entity';
 import { User } from '../user/entity/user.entity';
+import { Appointment } from '../appointment/entity/appointment.entity';
 
 @Injectable()
 export class ClinicSecretaryService {
@@ -15,6 +16,8 @@ export class ClinicSecretaryService {
     private userRepo: Repository<User>,
     @InjectRepository(Clinic)
     private clinicRepo: Repository<Clinic>,
+    @InjectRepository(Appointment)
+    private appointmentRepo: Repository<Appointment>,
   ) {}
 
   async assignSecretaryToClinic(dto: ClinicSecretaryDto) {
@@ -57,12 +60,57 @@ export class ClinicSecretaryService {
       );
     const clinic = relation.clinic;
     if (!clinic) throw new NotFoundException('Clínica no encontrada');
-    // Obtener las citas de la clínica
-    const appointments = await this.clinicRepo
-      .createQueryBuilder('clinic')
-      .leftJoinAndSelect('clinic.appointments', 'appointment')
-      .where('clinic.id = :clinicId', { clinicId: clinic.id })
-      .getOne();
-    return appointments?.appointments || [];
+
+    // Obtener las citas de la clínica con información básica de las relaciones
+    const appointments = await this.appointmentRepo.find({
+      where: { clinic: { id: clinic.id } },
+      relations: ['patient', 'doctor', 'doctor.user', 'clinic'],
+      order: { appointmentDate: 'DESC', appointmentTime: 'DESC' },
+    });
+
+    return appointments;
+  }
+
+  async getAppointmentDetails(secretaryId: number, appointmentId: number) {
+    // Verificar que la secretaria esté asignada a una clínica
+    const relation = await this.clinicSecretaryRepo.findOne({
+      where: { secretaryId, isActive: true },
+      relations: ['clinic'],
+    });
+
+    if (!relation) {
+      throw new NotFoundException(
+        'La secretaria no está asignada a ninguna clínica',
+      );
+    }
+
+    const clinic = relation.clinic;
+    if (!clinic) {
+      throw new NotFoundException('Clínica no encontrada');
+    }
+
+    // Obtener la cita con todas las relaciones necesarias
+    const appointment = await this.appointmentRepo.findOne({
+      where: {
+        id: appointmentId,
+        clinic: { id: clinic.id }, // Verificar que la cita pertenezca a la clínica de la secretaria
+      },
+      relations: [
+        'patient',
+        'doctor',
+        'doctor.user', // Para obtener información del usuario del doctor
+        'clinic',
+        'prescription',
+        'paymentReceipt',
+      ],
+    });
+
+    if (!appointment) {
+      throw new NotFoundException(
+        'Cita no encontrada o no pertenece a la clínica asignada',
+      );
+    }
+
+    return appointment;
   }
 }
